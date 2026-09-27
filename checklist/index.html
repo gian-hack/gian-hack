@@ -1,0 +1,514 @@
+<title>Spunta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{
+  --bg:#EEF0F5; --surface:#FFFFFF; --surface-2:#F6F7FA; --ink:#161A2B; --muted:#6A7089; --line:#DCDFE8;
+  --accent:#F2622E; --accent-ink:#FFFFFF; --accent-soft:#FDE6DC;
+  --done:#1D946A; --done-soft:#DDF2EA; --warn:#C8401A;
+  --shadow:0 1px 2px rgba(22,26,43,.06),0 8px 24px rgba(22,26,43,.06);
+  --display:"Bricolage Grotesque",ui-rounded,system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E1120; --surface:#171B2D; --surface-2:#1E2338; --ink:#E9ECF7; --muted:#8E94AE; --line:#2A3050;
+    --accent:#FF7A45; --accent-ink:#1A0E08; --accent-soft:#3A2218;
+    --done:#3CC48F; --done-soft:#15342A; --warn:#FF8A63;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E1120; --surface:#171B2D; --surface-2:#1E2338; --ink:#E9ECF7; --muted:#8E94AE; --line:#2A3050;
+  --accent:#FF7A45; --accent-ink:#1A0E08; --accent-soft:#3A2218;
+  --done:#3CC48F; --done-soft:#15342A; --warn:#FF8A63;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:18px 150px}
+
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.date{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:800;font-size:34px;line-height:1;margin:4px 0 0;letter-spacing:-.02em}
+.sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.sync i{width:7px;height:7px;border-radius:50%;background:var(--done);display:inline-block}
+.sync.local i{background:var(--accent)}
+
+.chips{display:flex;gap:8px;overflow-x:auto;margin:18px -16px 0;padding:2px 16px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;font-size:15px}
+.chip .n{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.7}
+.chip.add{border-style:dashed;color:var(--muted);background:transparent}
+
+.head{margin-top:22px;display:flex;align-items:flex-start;gap:12px}
+.head .t{flex:1;min-width:0}
+h2{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.05;margin:0;letter-spacing:-.015em;overflow-wrap:anywhere;text-wrap:balance}
+.meta{margin-top:6px;font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:6px;margin-top:10px;overflow:hidden}
+.bar b{display:block;height:100%;width:0;background:var(--done);border-radius:6px;transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.actions{display:flex;gap:8px;flex:none}
+.iconbtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:18px;line-height:1}
+.claudebtn{height:42px;border-radius:12px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:0 14px;display:flex;align-items:center;gap:6px}
+
+.menu{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+.menu button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px;font-size:14px}
+.menu button.danger{color:var(--warn)}
+.menu button.danger.arm{background:var(--warn);color:#fff;border-color:var(--warn)}
+
+ul.items{list-style:none;margin:16px 0 0;padding:0;background:var(--surface);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+ul.items:empty{display:none}
+li.item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+li.item:first-child{border-top:0}
+.check{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--muted);background:transparent;display:grid;place-items:center;margin-top:-2px;transition:transform .15s,background .2s,border-color .2s}
+.check svg{width:14px;height:14px;opacity:0;transform:scale(.4);transition:opacity .2s,transform .25s cubic-bezier(.3,1.6,.5,1)}
+.check:active{transform:scale(.88)}
+.item.prio .check{border-color:var(--accent)}
+.item.done .check{background:var(--done);border-color:var(--done)}
+.item.done .check svg{opacity:1;transform:scale(1)}
+.body{flex:1;min-width:0;background:none;border:0;text-align:left;padding:0}
+.txt{font-size:16px;overflow-wrap:anywhere}
+.item.done .txt{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--muted)}
+.sub{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;font-size:12.5px;color:var(--muted)}
+.tag{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:1px 6px;background:var(--surface-2);font-family:var(--mono);font-size:11.5px}
+.tag.late{background:var(--accent-soft);color:var(--warn)}
+.tag.today{background:var(--accent-soft);color:var(--accent)}
+.tag.p{background:var(--accent);color:var(--accent-ink)}
+.note{white-space:pre-wrap;overflow-wrap:anywhere}
+
+.section{display:flex;align-items:center;justify-content:space-between;margin-top:22px;padding:0 2px}
+.section button{background:none;border:0;padding:4px 0;color:var(--muted);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+
+.empty{margin-top:16px;padding:28px 18px;text-align:center;border:1.5px dashed var(--line);border-radius:16px;color:var(--muted)}
+.empty strong{display:block;font-family:var(--display);font-size:20px;color:var(--ink);margin-bottom:4px}
+
+.addbar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);z-index:5}
+.addbar form{max-width:640px;margin:0 auto;display:flex;gap:8px;align-items:center}
+.addbar input[type=text]{flex:1;min-width:0;height:46px;border-radius:14px;border:1px solid var(--line);background:var(--surface);padding:0 14px;font-size:16px}
+.toggle{flex:none;height:46px;min-width:46px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-weight:700;color:var(--muted);position:relative;padding:0 10px}
+.toggle[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.toggle input{position:absolute;inset:0;opacity:0;width:100%;height:100%}
+.go{flex:none;width:46px;height:46px;border-radius:14px;border:0;background:var(--ink);color:var(--bg);font-size:24px;line-height:1}
+.addhint{max-width:640px;margin:0 auto 6px;font-size:12px;color:var(--muted);font-family:var(--mono)}
+.addhint:empty{display:none}
+
+.scrim{position:fixed;inset:0;background:rgba(10,12,24,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:640px;max-height:88%;overflow-y:auto;background:var(--surface);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .25s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+.sheet h3{margin:0;font-family:var(--display);font-size:22px;font-weight:800}
+.sheet label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.sheet input,.sheet textarea,.sheet select{border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:12px;font-size:16px;font-weight:400;color:var(--ink)}
+.sheet textarea{min-height:80px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1 1 140px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);padding:0 16px;font-weight:600}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);flex:1}
+.btn.accent{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);flex:1}
+.btn.danger{color:var(--warn)}
+.btn.danger.arm{background:var(--warn);color:#fff;border-color:var(--warn)}
+.btn:disabled{opacity:.5}
+.sugg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.sugg label{flex-direction:row;align-items:center;gap:10px;background:var(--surface-2);border-radius:12px;padding:10px 12px;color:var(--ink);font-weight:500;font-size:15px}
+.sugg input{width:20px;height:20px;accent-color:var(--accent);padding:0;flex:none}
+.status{font-size:14px;color:var(--muted);min-height:1.2em}
+
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:30;display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
+.toast button{background:none;border:0;color:var(--accent);font-weight:700;padding:0}
+canvas.fx{position:fixed;inset:0;pointer-events:none;z-index:40;width:100%;height:100%}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="date" id="date"></div>
+      <h1>Spunta</h1>
+    </div>
+    <div class="sync" id="sync"><i></i><span>Collegamento…</span></div>
+  </header>
+
+  <nav class="chips" id="chips" aria-label="Liste"></nav>
+
+  <section id="view"></section>
+</div>
+
+<div class="addbar" id="addbar">
+  <div class="addhint" id="addhint"></div>
+  <form id="addform" autocomplete="off">
+    <input type="text" id="newtext" placeholder="Aggiungi una voce…" enterkeyhint="done" aria-label="Nuova voce">
+    <button type="button" class="toggle" id="newprio" aria-pressed="false" title="Priorità">!</button>
+    <span class="toggle" id="newduewrap" aria-pressed="false" title="Scadenza">📅<input type="date" id="newdue" aria-label="Scadenza"></span>
+    <button type="submit" class="go" aria-label="Aggiungi">+</button>
+  </form>
+</div>
+
+<div id="layer"></div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const el = (tag, props = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (k === "text") n.textContent = v;
+    else if (v !== false && v != null) n.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) n.append(k);
+  return n;
+};
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const pad = n => String(n).padStart(2, "0");
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+const fmtDue = s => { const [y,m,d] = s.split("-").map(Number); return `${d} ${MESI[m-1]}`; };
+const ls = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--surface)"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+
+$("#date").textContent = new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+
+let db = null, mode = "loading", lists = [], cur = ls.get("spunta.cur") || null;
+let showDone = ls.get("spunta.showDone") ?? true, menuOpen = false, newPrio = false;
+const chains = {};
+
+/* ---------- persistence ---------- */
+function setSync(kind){
+  const s = $("#sync");
+  s.classList.toggle("local", kind === "local");
+  s.querySelector("span").textContent = kind === "cloud" ? "Sincronizzata" : kind === "local" ? "Solo su questo dispositivo" : "Collegamento…";
+}
+function persist(list){
+  if (mode === "local") { ls.set("spunta.local", lists); return; }
+  const body = JSON.parse(JSON.stringify({ title: list.title, order: list.order, items: list.items, updated: Date.now() }));
+  chains[list.id] = (chains[list.id] || Promise.resolve())
+    .then(() => db.doc("lists/" + list.id).set(body))
+    .catch(e => toast(e?.code === "quota_exceeded" ? "Spazio pieno: elimina qualche lista." : "Modifica non salvata, riprova."));
+}
+function removeList(id){
+  if (mode === "local") { ls.set("spunta.local", lists); return; }
+  (chains[id] || Promise.resolve()).then(() => db.doc("lists/" + id).delete()).catch(() => toast("Non riesco a eliminare la lista."));
+}
+function startLocal(){
+  mode = "local"; setSync("local");
+  lists = ls.get("spunta.local") || [];
+  render();
+}
+async function boot(){
+  render();
+  if (!window.claude?.use) return startLocal();
+  db = await window.claude.use("db").catch(() => null);
+  if (!db) return startLocal();
+  mode = "cloud"; setSync("cloud");
+  db.collection("lists").onSnapshot(snap => {
+    lists = snap.docs.map(d => ({ id: d.id, ...JSON.parse(JSON.stringify(d.data())) }))
+      .map(l => ({ title: "Senza titolo", order: 0, ...l, items: Array.isArray(l.items) ? l.items : [] }))
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    render();
+  }, () => { setSync("local"); toast("Connessione persa. Ricarica la pagina."); });
+  sampleP = window.claude.use("sample").catch(() => null);
+}
+let sampleP = Promise.resolve(null);
+
+/* ---------- helpers ---------- */
+const getList = id => lists.find(l => l.id === id);
+function sortOpen(a, b){
+  if (!!b.prio - !!a.prio) return !!b.prio - !!a.prio;
+  if ((a.due || "9") !== (b.due || "9")) return (a.due || "9") < (b.due || "9") ? -1 : 1;
+  return (a.created || 0) - (b.created || 0);
+}
+function currentId(){
+  if (cur === "today") return "today";
+  if (cur && getList(cur)) return cur;
+  return lists[0]?.id || null;
+}
+function dueToday(){
+  const t = today(), out = [];
+  for (const l of lists) for (const it of l.items) if (!it.done && it.due && it.due <= t) out.push({ it, l });
+  return out.sort((a, b) => sortOpen(a.it, b.it));
+}
+
+/* ---------- render ---------- */
+function render(){
+  const id = currentId();
+  renderChips(id);
+  const v = $("#view"); v.replaceChildren();
+  $("#addbar").hidden = !(id && id !== "today");
+  if (mode === "loading") { v.append(el("div", { class: "empty" }, el("strong", { text: "Carico le tue liste…" }))); return; }
+  if (!lists.length) {
+    v.append(el("div", { class: "empty" },
+      el("strong", { text: "Nessuna lista, ancora." }),
+      "Crea la prima con “+ Nuova lista” qui sopra, oppure chiedi a Claude di preparartela in chat."));
+    return;
+  }
+  if (id === "today") return renderToday(v);
+  renderList(v, getList(id));
+}
+
+function renderChips(id){
+  const c = $("#chips"), sx = c.scrollLeft; c.replaceChildren();
+  const td = dueToday().length;
+  c.append(el("button", { class: "chip", "aria-pressed": String(id === "today"), onclick: () => go("today") },
+    "Oggi", el("span", { class: "n", text: String(td) })));
+  for (const l of lists) {
+    const open = l.items.filter(i => !i.done).length;
+    c.append(el("button", { class: "chip", "aria-pressed": String(l.id === id), onclick: () => go(l.id) },
+      l.title, el("span", { class: "n", text: `${l.items.length - open}/${l.items.length}` })));
+  }
+  c.append(el("button", { class: "chip add", onclick: openNewList }, "+ Nuova lista"));
+  c.scrollLeft = sx;
+}
+function go(id){ cur = id; menuOpen = false; ls.set("spunta.cur", id); render(); window.scrollTo({ top: 0 }); }
+
+function progress(items){
+  const done = items.filter(i => i.done).length, tot = items.length;
+  return { done, tot, pct: tot ? Math.round(done / tot * 100) : 0 };
+}
+
+function renderList(v, l){
+  const { done, tot, pct } = progress(l.items);
+  const bar = el("b"); requestAnimationFrame(() => bar.style.width = pct + "%");
+  const claudeBtn = el("button", { class: "claudebtn", onclick: () => openClaude(l) }, "✦ Claude");
+  sampleP.then(s => { if (!s) claudeBtn.hidden = true; });
+  v.append(el("div", { class: "head" },
+    el("div", { class: "t" },
+      el("h2", { text: l.title }),
+      el("div", { class: "meta", text: tot ? `${pad(done)}/${pad(tot)} fatte · ${pct}%` : "vuota" }),
+      el("div", { class: "bar" }, bar)),
+    el("div", { class: "actions" }, claudeBtn,
+      el("button", { class: "iconbtn", "aria-label": "Opzioni lista", "aria-expanded": String(menuOpen), onclick: () => { menuOpen = !menuOpen; render(); } }, "⋯"))));
+
+  if (menuOpen) {
+    const del = el("button", { class: "danger", onclick: e => {
+      if (!del.classList.contains("arm")) { del.classList.add("arm"); del.textContent = "Tocca ancora per eliminare"; return; }
+      lists = lists.filter(x => x.id !== l.id); removeList(l.id); menuOpen = false; cur = null; render(); toast("Lista eliminata");
+    } }, "Elimina lista");
+    v.append(el("div", { class: "menu" },
+      el("button", { onclick: () => openRename(l) }, "Rinomina"),
+      done ? el("button", { onclick: () => { const gone = l.items.filter(i => i.done); l.items = l.items.filter(i => !i.done); persist(l); menuOpen = false; render();
+        toast(`${gone.length} completate rimosse`, "Annulla", () => { l.items.push(...gone); persist(l); render(); }); } }, "Togli completate") : null,
+      done ? el("button", { onclick: () => { l.items.forEach(i => { i.done = false; i.doneAt = null; }); persist(l); menuOpen = false; render(); } }, "Ricomincia da capo") : null,
+      lists.length > 1 && lists[0].id !== l.id ? el("button", { onclick: () => { lists = [l, ...lists.filter(x => x !== l)]; lists.forEach((x, i) => { if (x.order !== i) { x.order = i; persist(x); } }); menuOpen = false; render(); } }, "Metti per prima") : null,
+      del));
+  }
+
+  const open = l.items.filter(i => !i.done).sort(sortOpen);
+  const closed = l.items.filter(i => i.done).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+  if (!tot) {
+    v.append(el("div", { class: "empty" }, el("strong", { text: "Lista vuota" }), "Scrivi la prima voce qui sotto, o tocca ✦ Claude per farti suggerire i passi."));
+  } else if (!open.length) {
+    v.append(el("div", { class: "empty" }, el("strong", { text: "Tutto fatto." }), "Ogni voce è spuntata. Bel lavoro."));
+  }
+  v.append(el("ul", { class: "items" }, open.map(it => itemRow(it, l))));
+  if (closed.length) {
+    v.append(el("div", { class: "section" },
+      el("button", { onclick: () => { showDone = !showDone; ls.set("spunta.showDone", showDone); render(); } },
+        `${showDone ? "▾" : "▸"} Completate · ${closed.length}`)));
+    if (showDone) v.append(el("ul", { class: "items" }, closed.map(it => itemRow(it, l))));
+  }
+  $("#addhint").textContent = "";
+}
+
+function renderToday(v){
+  const rows = dueToday();
+  v.append(el("div", { class: "head" }, el("div", { class: "t" },
+    el("h2", { text: "Oggi" }),
+    el("div", { class: "meta", text: rows.length ? `${rows.length} da fare entro oggi` : "niente in scadenza" }))));
+  if (!rows.length) v.append(el("div", { class: "empty" }, el("strong", { text: "Giornata libera." }), "Qui compaiono le voci con scadenza oggi o già passata, da tutte le liste."));
+  v.append(el("ul", { class: "items" }, rows.map(({ it, l }) => itemRow(it, l, true))));
+}
+
+function itemRow(it, l, showList){
+  const t = today();
+  const tags = [];
+  if (it.prio) tags.push(el("span", { class: "tag p", text: "priorità" }));
+  if (it.due) tags.push(el("span", { class: "tag" + (!it.done && it.due < t ? " late" : !it.done && it.due === t ? " today" : ""), text: it.due === t ? "oggi" : (it.due < t && !it.done ? "scaduta · " : "") + fmtDue(it.due) }));
+  if (showList) tags.push(el("span", { text: l.title }));
+  const check = el("button", { class: "check", "aria-label": it.done ? "Segna da fare" : "Segna fatta", onclick: () => toggle(it, l, check) });
+  check.innerHTML = CHECK;
+  return el("li", { class: "item" + (it.done ? " done" : "") + (it.prio ? " prio" : "") },
+    check,
+    el("button", { class: "body", onclick: () => openEdit(it, l) },
+      el("div", { class: "txt", text: it.text }),
+      it.note ? el("div", { class: "sub note", text: it.note }) : null,
+      tags.length ? el("div", { class: "sub" }, tags) : null));
+}
+
+function toggle(it, l, node){
+  it.done = !it.done; it.doneAt = it.done ? Date.now() : null;
+  node.closest("li").classList.toggle("done", it.done);
+  if (navigator.vibrate) try { navigator.vibrate(8); } catch {}
+  persist(l);
+  const allDone = it.done && l.items.length > 1 && l.items.every(i => i.done);
+  if (allDone) { const r = node.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top); }
+  setTimeout(render, it.done ? 380 : 0);
+}
+
+/* ---------- add bar ---------- */
+$("#newprio").addEventListener("click", () => { newPrio = !newPrio; $("#newprio").setAttribute("aria-pressed", String(newPrio)); });
+$("#newdue").addEventListener("change", () => {
+  const v = $("#newdue").value;
+  $("#newduewrap").setAttribute("aria-pressed", String(!!v));
+  $("#newduewrap").firstChild.textContent = v ? fmtDue(v) : "📅";
+});
+$("#addform").addEventListener("submit", e => {
+  e.preventDefault();
+  const l = getList(currentId()); const text = $("#newtext").value.trim();
+  if (!l || !text) return;
+  l.items.push({ id: uid(), text: text.slice(0, 300), done: false, prio: newPrio, due: $("#newdue").value || "", note: "", created: Date.now() });
+  persist(l);
+  $("#newtext").value = ""; newPrio = false; $("#newprio").setAttribute("aria-pressed", "false");
+  $("#newdue").value = ""; $("#newdue").dispatchEvent(new Event("change"));
+  render(); $("#newtext").focus();
+});
+
+/* ---------- sheets ---------- */
+function sheet(...kids){
+  const s = el("div", { class: "sheet", role: "dialog", "aria-modal": "true" }, ...kids);
+  const scrim = el("div", { class: "scrim", onclick: e => { if (e.target === scrim) close(); } }, s);
+  const close = () => { scrim.remove(); document.removeEventListener("keydown", esc); };
+  const esc = e => { if (e.key === "Escape") close(); };
+  document.addEventListener("keydown", esc);
+  $("#layer").append(scrim);
+  return close;
+}
+
+function openNewList(){
+  const inp = el("input", { id: "nl-title", placeholder: "Es. Trasloco, Palestra, Viaggio a Lisbona", maxlength: "60" });
+  const save = el("button", { class: "btn primary", type: "submit" }, "Crea lista");
+  const f = el("form", { onsubmit: e => {
+    e.preventDefault(); const t = inp.value.trim(); if (!t) return inp.focus();
+    const l = { id: uid(), title: t, order: lists.length ? Math.max(...lists.map(x => x.order ?? 0)) + 1 : 0, items: [] };
+    lists.push(l); persist(l); close(); go(l.id);
+  } }, el("div", { class: "btns", style: "flex-direction:column;gap:14px" }, el("h3", { text: "Nuova lista" }), el("label", {}, "Nome", inp), save));
+  const close = sheet(f); setTimeout(() => inp.focus(), 50);
+}
+
+function openRename(l){
+  const inp = el("input", { id: "rn-title", value: l.title, maxlength: "60" });
+  const f = el("form", { onsubmit: e => { e.preventDefault(); const t = inp.value.trim(); if (!t) return; l.title = t; persist(l); menuOpen = false; close(); render(); } },
+    el("div", { class: "btns", style: "flex-direction:column;gap:14px" }, el("h3", { text: "Rinomina lista" }), el("label", {}, "Nome", inp), el("button", { class: "btn primary", type: "submit" }, "Salva")));
+  const close = sheet(f); setTimeout(() => inp.select(), 50);
+}
+
+function openEdit(it, l){
+  const text = el("input", { id: "ed-text", value: it.text, maxlength: "300" });
+  const note = el("textarea", { id: "ed-note", placeholder: "Dettagli, link, numeri utili…" }); note.value = it.note || "";
+  const due = el("input", { id: "ed-due", type: "date", value: it.due || "" });
+  const prio = el("select", { id: "ed-prio" }, el("option", { value: "0", text: "Normale" }), el("option", { value: "1", text: "Priorità" })); prio.value = it.prio ? "1" : "0";
+  const move = el("select", { id: "ed-list" }, lists.map(x => el("option", { value: x.id, text: x.title }))); move.value = l.id;
+  const del = el("button", { class: "btn danger", type: "button", onclick: () => {
+    if (!del.classList.contains("arm")) { del.classList.add("arm"); del.textContent = "Conferma"; return; }
+    const idx = l.items.indexOf(it); l.items.splice(idx, 1); persist(l); close(); render();
+    toast("Voce eliminata", "Annulla", () => { l.items.splice(idx, 0, it); persist(l); render(); });
+  } }, "Elimina");
+  const f = el("form", { style: "display:contents", onsubmit: e => {
+    e.preventDefault(); const t = text.value.trim(); if (!t) return text.focus();
+    Object.assign(it, { text: t, note: note.value.trim(), due: due.value || "", prio: prio.value === "1" });
+    if (move.value !== l.id) { const to = getList(move.value); l.items = l.items.filter(x => x !== it); to.items.push(it); persist(to); }
+    persist(l); close(); render();
+  } },
+    el("h3", { text: "Modifica voce" }),
+    el("label", {}, "Voce", text),
+    el("label", {}, "Note", note),
+    el("div", { class: "row" }, el("label", {}, "Scadenza", due), el("label", {}, "Importanza", prio)),
+    lists.length > 1 ? el("label", {}, "Lista", move) : null,
+    el("div", { class: "btns" }, del, el("button", { class: "btn primary", type: "submit" }, "Salva")));
+  const close = sheet(f);
+}
+
+async function openClaude(l){
+  const sample = await sampleP; if (!sample) return;
+  const ctx = el("textarea", { id: "cl-ctx", placeholder: "Es. parto venerdì per 4 giorni, zaino piccolo, faccio trekking" });
+  const status = el("div", { class: "status" });
+  const list = el("ul", { class: "sugg" });
+  const ask = el("button", { class: "btn accent", type: "button" }, "✦ Suggerisci voci");
+  const addSel = el("button", { class: "btn primary", type: "button", hidden: true }, "Aggiungi selezionate");
+  let ctl = null;
+  ask.onclick = async () => {
+    ctl?.abort(); ctl = new AbortController();
+    ask.disabled = true; addSel.hidden = true; list.replaceChildren(); status.textContent = "Claude sta pensando…";
+    const existing = l.items.map(i => "- " + i.text + (i.done ? " (fatta)" : "")).join("\n").slice(0, 6000) || "(nessuna)";
+    const prompt = `Aiutami a completare una checklist personale intitolata "${l.title}".
+Contesto che ti do: ${ctx.value.trim() || "(nessuno)"}
+Voci già presenti:
+${existing}
+
+Suggerisci da 5 a 10 NUOVE voci concrete e azionabili, in italiano, brevi (massimo 70 caratteri ciascuna), senza duplicare quelle presenti, in un ordine logico di esecuzione. Segna come prioritarie al massimo 2 voci davvero critiche.
+Rispondi solo con un array JSON, per esempio: [{"text":"Prenotare il taxi per l'aeroporto","prio":true}]`;
+    try {
+      const out = await sample.json(prompt, { signal: ctl.signal, cache: false });
+      const items = (Array.isArray(out) ? out : []).filter(x => x && typeof x.text === "string" && x.text.trim()).slice(0, 12);
+      if (!items.length) { status.textContent = "Nessun suggerimento utile. Aggiungi un po' di contesto e riprova."; return; }
+      status.textContent = "Scegli cosa aggiungere:";
+      items.forEach((s, i) => list.append(el("li", {}, el("label", {},
+        el("input", { type: "checkbox", id: "sg-" + i, checked: "", "data-i": i }),
+        el("span", { text: s.text.trim().slice(0, 120) + (s.prio ? "  ·  priorità" : "") })))));
+      addSel.hidden = false;
+      addSel.onclick = () => {
+        const picked = [...list.querySelectorAll("input:checked")].map(c => items[+c.dataset.i]);
+        const now = Date.now();
+        picked.forEach((s, k) => l.items.push({ id: uid(), text: s.text.trim().slice(0, 300), done: false, prio: !!s.prio, due: "", note: "", created: now + k }));
+        if (picked.length) persist(l);
+        close(); render(); if (picked.length) toast(`${picked.length} voci aggiunte`);
+      };
+    } catch (e) {
+      const msg = {
+        cancelled: "", not_granted: "Serve il tuo permesso per usare Claude da questa pagina.",
+        rate_limited: "Troppe richieste ravvicinate. Riprova tra poco.", invalid_json: "Risposta non leggibile. Riprova.",
+        refused: "Claude non può aiutare con questa richiesta. Prova a riformularla.", session_expired: "Accedi di nuovo a Claude e riprova."
+      }[e?.code];
+      status.textContent = msg ?? "Qualcosa è andato storto. Riprova.";
+    } finally { ask.disabled = false; ask.textContent = "✦ Altri suggerimenti"; }
+  };
+  const close0 = sheet(
+    el("h3", { text: "✦ Chiedi a Claude" }),
+    el("div", { class: "status", text: `Suggerimenti per “${l.title}”, in base a quello che c'è già.` }),
+    el("label", {}, "Dettagli (facoltativi)", ctx),
+    el("div", { class: "btns" }, ask),
+    status, list, addSel);
+  const close = () => { ctl?.abort(); close0(); };
+}
+
+/* ---------- toast + confetti ---------- */
+let toastT;
+function toast(msg, action, fn){
+  document.querySelector(".toast")?.remove(); clearTimeout(toastT);
+  const t = el("div", { class: "toast", role: "status" }, el("span", { text: msg }),
+    action ? el("button", { onclick: () => { fn(); t.remove(); } }, action) : null);
+  document.body.append(t); toastT = setTimeout(() => t.remove(), 4000);
+}
+function confetti(x, y){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return toast("Lista completata!");
+  const c = el("canvas", { class: "fx" }); document.body.append(c);
+  const dpr = devicePixelRatio || 1; c.width = innerWidth * dpr; c.height = innerHeight * dpr;
+  const g = c.getContext("2d"); g.scale(dpr, dpr);
+  const cs = getComputedStyle(document.documentElement);
+  const cols = [cs.getPropertyValue("--accent"), cs.getPropertyValue("--done"), cs.getPropertyValue("--ink"), "#FFC53D"];
+  const P = Array.from({ length: 90 }, () => ({ x, y, vx: (Math.random() - .5) * 11, vy: -Math.random() * 13 - 3, r: Math.random() * 6.28, vr: (Math.random() - .5) * .4, w: 5 + Math.random() * 6, c: cols[Math.random() * cols.length | 0] }));
+  let f = 0;
+  (function tick(){
+    g.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .42; p.x += p.vx; p.y += p.vy; p.vx *= .985; p.r += p.vr;
+      g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.fillRect(-p.w / 2, -p.w / 4, p.w, p.w / 2); g.restore(); }
+    if (++f < 110) requestAnimationFrame(tick); else c.remove();
+  })();
+  toast("Lista completata!");
+}
+
+boot();
+})();
+</script>
