@@ -105,6 +105,13 @@ li.item:first-child{border-top:0}
 .sugg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .sugg label{flex-direction:row;align-items:center;gap:10px;background:var(--surface-2);border-radius:12px;padding:10px 12px;color:var(--ink);font-weight:500;font-size:15px}
 .sugg input{width:20px;height:20px;accent-color:var(--accent);padding:0;flex:none}
+.days{display:flex;gap:6px}
+.day{flex:1;min-width:0;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);font-weight:600;font-size:14px;padding:0}
+.day[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.quick{display:flex;gap:8px;flex-wrap:wrap}
+.quick button{border:1px solid var(--line);background:none;border-radius:999px;padding:5px 12px;font-size:13px;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600;color:var(--muted)}
+.tag.rep{background:var(--done-soft);color:var(--done)}
 .status{font-size:14px;color:var(--muted);min-height:1.2em}
 
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:30;display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
@@ -158,6 +165,12 @@ const pad = n => String(n).padStart(2, "0");
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
 const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
 const fmtDue = s => { const [y,m,d] = s.split("-").map(Number); return `${d} ${MESI[m-1]}`; };
+const GIORNI = ["lun","mar","mer","gio","ven","sab","dom"];
+const dow = () => ((new Date().getDay() + 6) % 7) + 1;            // 1 = lunedì … 7 = domenica
+const rec = it => Array.isArray(it.days) && it.days.length > 0;   // voce che si ripete
+const isDone = it => rec(it) ? it.doneOn === today() : !!it.done;
+const fmtDur = m => { m = Math.round(m); if (m < 60) return m + " min"; const h = Math.floor(m / 60), r = m % 60; return h + " h" + (r ? " " + r : ""); };
+const fmtDays = d => { const s = [...d].sort().join(""); return s === "1234567" ? "ogni giorno" : s === "12345" ? "lun–ven" : s === "67" ? "weekend" : [...d].sort().map(x => GIORNI[x - 1]).join(" "); };
 const ls = {
   get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
   set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
@@ -213,7 +226,12 @@ const getList = id => lists.find(l => l.id === id);
 function sortOpen(a, b){
   if (!!b.prio - !!a.prio) return !!b.prio - !!a.prio;
   if ((a.due || "9") !== (b.due || "9")) return (a.due || "9") < (b.due || "9") ? -1 : 1;
+  if ((a.time || "99") !== (b.time || "99")) return (a.time || "99") < (b.time || "99") ? -1 : 1;
   return (a.created || 0) - (b.created || 0);
+}
+function sortToday(a, b){
+  if ((a.time || "99") !== (b.time || "99")) return (a.time || "99") < (b.time || "99") ? -1 : 1;
+  return sortOpen(a, b);
 }
 function currentId(){
   if (cur === "today") return "today";
@@ -221,9 +239,10 @@ function currentId(){
   return lists[0]?.id || null;
 }
 function dueToday(){
-  const t = today(), out = [];
-  for (const l of lists) for (const it of l.items) if (!it.done && it.due && it.due <= t) out.push({ it, l });
-  return out.sort((a, b) => sortOpen(a.it, b.it));
+  const t = today(), d = dow(), out = [];
+  for (const l of lists) for (const it of l.items)
+    if (!isDone(it) && ((it.due && it.due <= t) || (rec(it) && it.days.includes(d)))) out.push({ it, l });
+  return out.sort((a, b) => sortToday(a.it, b.it));
 }
 
 /* ---------- render ---------- */
@@ -249,7 +268,7 @@ function renderChips(id){
   c.append(el("button", { class: "chip", "aria-pressed": String(id === "today"), onclick: () => go("today") },
     "Oggi", el("span", { class: "n", text: String(td) })));
   for (const l of lists) {
-    const open = l.items.filter(i => !i.done).length;
+    const open = l.items.filter(i => !isDone(i)).length;
     c.append(el("button", { class: "chip", "aria-pressed": String(l.id === id), onclick: () => go(l.id) },
       l.title, el("span", { class: "n", text: `${l.items.length - open}/${l.items.length}` })));
   }
@@ -259,19 +278,20 @@ function renderChips(id){
 function go(id){ cur = id; menuOpen = false; ls.set("spunta.cur", id); render(); window.scrollTo({ top: 0 }); }
 
 function progress(items){
-  const done = items.filter(i => i.done).length, tot = items.length;
+  const done = items.filter(isDone).length, tot = items.length;
   return { done, tot, pct: tot ? Math.round(done / tot * 100) : 0 };
 }
 
 function renderList(v, l){
   const { done, tot, pct } = progress(l.items);
+  const left = l.items.filter(i => !isDone(i)).reduce((s, i) => s + (+i.dur || 0), 0);
   const bar = el("b"); requestAnimationFrame(() => bar.style.width = pct + "%");
   const claudeBtn = el("button", { class: "claudebtn", onclick: () => openClaude(l) }, "✦ Claude");
   sampleP.then(s => { if (!s) claudeBtn.hidden = true; });
   v.append(el("div", { class: "head" },
     el("div", { class: "t" },
       el("h2", { text: l.title }),
-      el("div", { class: "meta", text: tot ? `${pad(done)}/${pad(tot)} fatte · ${pct}%` : "vuota" }),
+      el("div", { class: "meta", text: tot ? `${pad(done)}/${pad(tot)} fatte · ${pct}%` + (left ? ` · ${fmtDur(left)} rimasti` : "") : "vuota" }),
       el("div", { class: "bar" }, bar)),
     el("div", { class: "actions" }, claudeBtn,
       el("button", { class: "iconbtn", "aria-label": "Opzioni lista", "aria-expanded": String(menuOpen), onclick: () => { menuOpen = !menuOpen; render(); } }, "⋯"))));
@@ -283,15 +303,15 @@ function renderList(v, l){
     } }, "Elimina lista");
     v.append(el("div", { class: "menu" },
       el("button", { onclick: () => openRename(l) }, "Rinomina"),
-      done ? el("button", { onclick: () => { const gone = l.items.filter(i => i.done); l.items = l.items.filter(i => !i.done); persist(l); menuOpen = false; render();
+      l.items.some(i => i.done && !rec(i)) ? el("button", { onclick: () => { const gone = l.items.filter(i => i.done && !rec(i)); l.items = l.items.filter(i => !(i.done && !rec(i))); persist(l); menuOpen = false; render();
         toast(`${gone.length} completate rimosse`, "Annulla", () => { l.items.push(...gone); persist(l); render(); }); } }, "Togli completate") : null,
-      done ? el("button", { onclick: () => { l.items.forEach(i => { i.done = false; i.doneAt = null; }); persist(l); menuOpen = false; render(); } }, "Ricomincia da capo") : null,
+      done ? el("button", { onclick: () => { l.items.forEach(i => { i.done = false; i.doneAt = null; i.doneOn = ""; }); persist(l); menuOpen = false; render(); } }, "Ricomincia da capo") : null,
       lists.length > 1 && lists[0].id !== l.id ? el("button", { onclick: () => { lists = [l, ...lists.filter(x => x !== l)]; lists.forEach((x, i) => { if (x.order !== i) { x.order = i; persist(x); } }); menuOpen = false; render(); } }, "Metti per prima") : null,
       del));
   }
 
-  const open = l.items.filter(i => !i.done).sort(sortOpen);
-  const closed = l.items.filter(i => i.done).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+  const open = l.items.filter(i => !isDone(i)).sort(sortOpen);
+  const closed = l.items.filter(isDone).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
   if (!tot) {
     v.append(el("div", { class: "empty" }, el("strong", { text: "Lista vuota" }), "Scrivi la prima voce qui sotto, o tocca ✦ Claude per farti suggerire i passi."));
   } else if (!open.length) {
@@ -309,22 +329,26 @@ function renderList(v, l){
 
 function renderToday(v){
   const rows = dueToday();
+  const mins = rows.reduce((s, r) => s + (+r.it.dur || 0), 0);
   v.append(el("div", { class: "head" }, el("div", { class: "t" },
     el("h2", { text: "Oggi" }),
-    el("div", { class: "meta", text: rows.length ? `${rows.length} da fare entro oggi` : "niente in scadenza" }))));
-  if (!rows.length) v.append(el("div", { class: "empty" }, el("strong", { text: "Giornata libera." }), "Qui compaiono le voci con scadenza oggi o già passata, da tutte le liste."));
+    el("div", { class: "meta", text: rows.length ? `${rows.length} da fare` + (mins ? ` · ${fmtDur(mins)} in tutto` : "") : "niente in programma" }))));
+  if (!rows.length) v.append(el("div", { class: "empty" }, el("strong", { text: "Giornata libera." }), "Qui compaiono, da tutte le liste, le voci che scadono oggi o sono scadute e quelle che si ripetono di " + GIORNI[dow() - 1] + "."));
   v.append(el("ul", { class: "items" }, rows.map(({ it, l }) => itemRow(it, l, true))));
 }
 
 function itemRow(it, l, showList){
-  const t = today();
+  const t = today(), dn = isDone(it);
   const tags = [];
   if (it.prio) tags.push(el("span", { class: "tag p", text: "priorità" }));
-  if (it.due) tags.push(el("span", { class: "tag" + (!it.done && it.due < t ? " late" : !it.done && it.due === t ? " today" : ""), text: it.due === t ? "oggi" : (it.due < t && !it.done ? "scaduta · " : "") + fmtDue(it.due) }));
+  if (it.time) tags.push(el("span", { class: "tag", text: "ore " + it.time }));
+  if (+it.dur) tags.push(el("span", { class: "tag", text: fmtDur(+it.dur) }));
+  if (rec(it)) tags.push(el("span", { class: "tag rep", text: "↻ " + fmtDays(it.days) }));
+  if (it.due) tags.push(el("span", { class: "tag" + (!dn && it.due < t ? " late" : !dn && it.due === t ? " today" : ""), text: it.due === t ? "oggi" : (it.due < t && !dn ? "scaduta · " : "") + fmtDue(it.due) }));
   if (showList) tags.push(el("span", { text: l.title }));
-  const check = el("button", { class: "check", "aria-label": it.done ? "Segna da fare" : "Segna fatta", onclick: () => toggle(it, l, check) });
+  const check = el("button", { class: "check", "aria-label": dn ? "Segna da fare" : "Segna fatta", onclick: () => toggle(it, l, check) });
   check.innerHTML = CHECK;
-  return el("li", { class: "item" + (it.done ? " done" : "") + (it.prio ? " prio" : "") },
+  return el("li", { class: "item" + (dn ? " done" : "") + (it.prio ? " prio" : "") },
     check,
     el("button", { class: "body", onclick: () => openEdit(it, l) },
       el("div", { class: "txt", text: it.text }),
@@ -333,13 +357,15 @@ function itemRow(it, l, showList){
 }
 
 function toggle(it, l, node){
-  it.done = !it.done; it.doneAt = it.done ? Date.now() : null;
-  node.closest("li").classList.toggle("done", it.done);
+  const now = !isDone(it);
+  if (rec(it)) it.doneOn = now ? today() : ""; else it.done = now;
+  it.doneAt = now ? Date.now() : null;
+  node.closest("li").classList.toggle("done", now);
   if (navigator.vibrate) try { navigator.vibrate(8); } catch {}
   persist(l);
-  const allDone = it.done && l.items.length > 1 && l.items.every(i => i.done);
+  const allDone = now && l.items.length > 1 && l.items.every(isDone);
   if (allDone) { const r = node.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top); }
-  setTimeout(render, it.done ? 380 : 0);
+  setTimeout(render, now ? 380 : 0);
 }
 
 /* ---------- add bar ---------- */
@@ -394,6 +420,14 @@ function openEdit(it, l){
   const note = el("textarea", { id: "ed-note", placeholder: "Dettagli, link, numeri utili…" }); note.value = it.note || "";
   const due = el("input", { id: "ed-due", type: "date", value: it.due || "" });
   const prio = el("select", { id: "ed-prio" }, el("option", { value: "0", text: "Normale" }), el("option", { value: "1", text: "Priorità" })); prio.value = it.prio ? "1" : "0";
+  const time = el("input", { id: "ed-time", type: "time", value: it.time || "" });
+  const DURS = [0, 5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240];
+  if (+it.dur && !DURS.includes(+it.dur)) DURS.push(+it.dur), DURS.sort((a, b) => a - b);
+  const dur = el("select", { id: "ed-dur" }, DURS.map(m => el("option", { value: String(m), text: m ? fmtDur(m) : "Nessuna" }))); dur.value = String(+it.dur || 0);
+  const sel = new Set(rec(it) ? it.days : []);
+  const dayBtns = GIORNI.map((g, i) => el("button", { type: "button", class: "day", "aria-pressed": String(sel.has(i + 1)), "aria-label": g,
+    onclick: e => { sel.has(i + 1) ? sel.delete(i + 1) : sel.add(i + 1); e.currentTarget.setAttribute("aria-pressed", String(sel.has(i + 1))); } }, g[0].toUpperCase()));
+  const setDays = arr => { sel.clear(); arr.forEach(d => sel.add(d)); dayBtns.forEach((b, i) => b.setAttribute("aria-pressed", String(sel.has(i + 1)))); };
   const move = el("select", { id: "ed-list" }, lists.map(x => el("option", { value: x.id, text: x.title }))); move.value = l.id;
   const del = el("button", { class: "btn danger", type: "button", onclick: () => {
     if (!del.classList.contains("arm")) { del.classList.add("arm"); del.textContent = "Conferma"; return; }
@@ -402,13 +436,25 @@ function openEdit(it, l){
   } }, "Elimina");
   const f = el("form", { style: "display:contents", onsubmit: e => {
     e.preventDefault(); const t = text.value.trim(); if (!t) return text.focus();
-    Object.assign(it, { text: t, note: note.value.trim(), due: due.value || "", prio: prio.value === "1" });
+    const wasRec = rec(it);
+    Object.assign(it, { text: t, note: note.value.trim(), due: due.value || "", prio: prio.value === "1",
+      time: time.value || "", dur: +dur.value || 0, days: [...sel].sort() });
+    if (rec(it) && !wasRec) { if (it.done) it.doneOn = today(); it.done = false; }
+    if (!rec(it) && wasRec) { it.done = it.doneOn === today(); it.doneOn = ""; }
     if (move.value !== l.id) { const to = getList(move.value); l.items = l.items.filter(x => x !== it); to.items.push(it); persist(to); }
     persist(l); close(); render();
   } },
     el("h3", { text: "Modifica voce" }),
     el("label", {}, "Voce", text),
     el("label", {}, "Note", note),
+    el("div", { class: "row" }, el("label", {}, "Orario", time), el("label", {}, "Quanto ci vuole", dur)),
+    el("div", { class: "field" }, "Ripeti nei giorni",
+      el("div", { class: "days" }, dayBtns),
+      el("div", { class: "quick" },
+        el("button", { type: "button", onclick: () => setDays([1,2,3,4,5,6,7]) }, "Ogni giorno"),
+        el("button", { type: "button", onclick: () => setDays([1,2,3,4,5]) }, "Lun–Ven"),
+        el("button", { type: "button", onclick: () => setDays([6,7]) }, "Weekend"),
+        el("button", { type: "button", onclick: () => setDays([]) }, "Nessuno"))),
     el("div", { class: "row" }, el("label", {}, "Scadenza", due), el("label", {}, "Importanza", prio)),
     lists.length > 1 ? el("label", {}, "Lista", move) : null,
     el("div", { class: "btns" }, del, el("button", { class: "btn primary", type: "submit" }, "Salva")));
@@ -426,14 +472,15 @@ async function openClaude(l){
   ask.onclick = async () => {
     ctl?.abort(); ctl = new AbortController();
     ask.disabled = true; addSel.hidden = true; list.replaceChildren(); status.textContent = "Claude sta pensando…";
-    const existing = l.items.map(i => "- " + i.text + (i.done ? " (fatta)" : "")).join("\n").slice(0, 6000) || "(nessuna)";
+    const existing = l.items.map(i => "- " + i.text + (isDone(i) ? " (fatta)" : "")).join("\n").slice(0, 6000) || "(nessuna)";
     const prompt = `Aiutami a completare una checklist personale intitolata "${l.title}".
 Contesto che ti do: ${ctx.value.trim() || "(nessuno)"}
 Voci già presenti:
 ${existing}
 
 Suggerisci da 5 a 10 NUOVE voci concrete e azionabili, in italiano, brevi (massimo 70 caratteri ciascuna), senza duplicare quelle presenti, in un ordine logico di esecuzione. Segna come prioritarie al massimo 2 voci davvero critiche.
-Rispondi solo con un array JSON, per esempio: [{"text":"Prenotare il taxi per l'aeroporto","prio":true}]`;
+Per ogni voce stima anche quanti minuti richiede ("dur", numero intero; 0 se non ha senso).
+Rispondi solo con un array JSON, per esempio: [{"text":"Prenotare il taxi per l'aeroporto","prio":true,"dur":10}]`;
     try {
       const out = await sample.json(prompt, { signal: ctl.signal, cache: false });
       const items = (Array.isArray(out) ? out : []).filter(x => x && typeof x.text === "string" && x.text.trim()).slice(0, 12);
@@ -441,12 +488,12 @@ Rispondi solo con un array JSON, per esempio: [{"text":"Prenotare il taxi per l'
       status.textContent = "Scegli cosa aggiungere:";
       items.forEach((s, i) => list.append(el("li", {}, el("label", {},
         el("input", { type: "checkbox", id: "sg-" + i, checked: "", "data-i": i }),
-        el("span", { text: s.text.trim().slice(0, 120) + (s.prio ? "  ·  priorità" : "") })))));
+        el("span", { text: s.text.trim().slice(0, 120) + (+s.dur > 0 ? "  ·  " + fmtDur(+s.dur) : "") + (s.prio ? "  ·  priorità" : "") })))));
       addSel.hidden = false;
       addSel.onclick = () => {
         const picked = [...list.querySelectorAll("input:checked")].map(c => items[+c.dataset.i]);
         const now = Date.now();
-        picked.forEach((s, k) => l.items.push({ id: uid(), text: s.text.trim().slice(0, 300), done: false, prio: !!s.prio, due: "", note: "", created: now + k }));
+        picked.forEach((s, k) => l.items.push({ id: uid(), text: s.text.trim().slice(0, 300), done: false, prio: !!s.prio, due: "", note: "", dur: Math.max(0, Math.min(1440, Math.round(+s.dur) || 0)), created: now + k }));
         if (picked.length) persist(l);
         close(); render(); if (picked.length) toast(`${picked.length} voci aggiunte`);
       };
