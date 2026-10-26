@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Offerta · Caseificio Perrusio</title>
+<style>
+  @font-face { font-family: "Karla"; src: url("../fonts/Karla.woff2") format("woff2"); font-weight: 200 800; }
+  /* Gelasio: stesse misure di Georgia, libero, per avere lo stesso aspetto ovunque */
+  @font-face { font-family: "Gelasio"; src: url("../fonts/Gelasio-Regular.woff2") format("woff2"); }
+  @font-face { font-family: "Gelasio"; src: url("../fonts/Gelasio-Italic.woff2") format("woff2"); font-style: italic; }
+
+  :root {
+    --salvia: #5C6E4F; --verde-scuro: #3F4A36; --castagna: #6A3F1A; --ocra: #DA8932;
+    --crema: #F8F0E3; --foglia: #E3E8DD; --beige: #EADFCF; --bordeaux: #6E2E28;
+    --serif: Georgia, "Gelasio", serif; --sans: "Karla", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--crema); }
+  body { font-family: var(--sans); color: var(--verde-scuro); -webkit-font-smoothing: antialiased; }
+
+  .tela {
+    position: relative; overflow: hidden; background: var(--crema);
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .cornice { position: absolute; border: calc(var(--u) * .25) solid var(--beige); inset: var(--margine) var(--margine) 0; border-radius: calc(var(--u) * 2) calc(var(--u) * 2) 0 0; border-bottom: 0; pointer-events: none; }
+
+  .logo { width: var(--logo); display: block; }
+  .occhiello {
+    font-weight: 700; text-transform: uppercase; letter-spacing: .22em; color: var(--ocra);
+    font-size: calc(var(--u) * 2.1);
+  }
+  .avviso {
+    display: inline-block; background: var(--bordeaux); color: var(--crema);
+    font-weight: 700; text-transform: uppercase; letter-spacing: .14em;
+    font-size: calc(var(--u) * 1.9); padding: calc(var(--u) * .8) calc(var(--u) * 2.2); border-radius: 999px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 400; color: var(--castagna);
+    font-size: var(--titolo); line-height: 1.04; letter-spacing: -.01em; white-space: pre-line;
+  }
+  .testo { font-size: calc(var(--u) * 2.5); line-height: 1.45; max-width: 30em; color: var(--verde-scuro); }
+  .pera { width: calc(var(--u) * 7); height: auto; color: var(--ocra); }
+  .foto { width: 100%; object-fit: cover; border-radius: calc(var(--u) * 1.6); background: var(--beige); }
+
+  .prezzi { display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 3); }
+  .prima { font-size: calc(var(--u) * 3); color: var(--castagna); opacity: .7; text-decoration: line-through; text-decoration-thickness: .08em; }
+  .prezzo {
+    background: var(--salvia); color: var(--crema); font-weight: 700;
+    font-size: calc(var(--u) * 6.4); line-height: 1; letter-spacing: -.01em;
+    padding: calc(var(--u) * 1.6) calc(var(--u) * 3.4); border-radius: calc(var(--u) * 1.6);
+  }
+  .formato { font-size: calc(var(--u) * 2.1); font-weight: 700; color: var(--salvia); text-transform: uppercase; letter-spacing: .14em; }
+  .validita { font-size: calc(var(--u) * 1.9); color: var(--verde-scuro); opacity: .8; }
+
+  .piede {
+    width: 100%; background: var(--salvia); color: var(--crema);
+    font-size: calc(var(--u) * 1.9); letter-spacing: .04em; padding: calc(var(--u) * 2.2) var(--margine);
+    display: flex; justify-content: center; gap: calc(var(--u) * 2.4); flex-wrap: wrap;
+  }
+  .piede b { font-weight: 700; }
+  .corpo { position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: var(--interno); }
+  .gruppo { display: flex; flex-direction: column; align-items: center; gap: var(--spazio); }
+
+  /* Post 1080 × 1080 */
+  .post  { width: 1080px; height: 1080px; --u: 10px; --margine: 28px; --interno: 64px 90px 52px; --logo: 190px; --titolo: 104px; --spazio: 22px; }
+  .post .testo { display: none; }
+  /* Storia 1080 × 1920 */
+  .story { width: 1080px; height: 1920px; --u: 12px; --margine: 36px; --interno: 170px 100px 210px; --logo: 260px; --titolo: 132px; --spazio: 34px; }
+  .story .piede { padding-bottom: 150px; }
+  /* Locandina A4 a 300 dpi: 2480 × 3508 */
+  .a4    { width: 2480px; height: 3508px; --u: 26px; --margine: 70px; --interno: 220px 200px 170px; --logo: 560px; --titolo: 300px; --spazio: 64px; }
+</style>
+</head>
+<body>
+<div class="tela" id="tela">
+  <div class="corpo">
+    <div class="cornice"></div>
+    <img class="logo" src="../logo/logo-originale.png" alt="Caseificio Perrusio">
+    <div class="gruppo">
+      <span class="avviso" data-k="avviso"></span>
+      <div class="occhiello" data-k="occhiello"></div>
+      <h1 data-k="titolo"></h1>
+      <!-- Una pera disegnata a tratto, solo come dettaglio in ocra: le foto restano quelle vere -->
+      <svg class="pera" viewBox="0 0 64 80" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M32 18c-6 0-9 5-9 11 0 6-11 12-11 28 0 12 9 19 20 19s20-7 20-19c0-16-11-22-11-28 0-6-3-11-9-11z"/>
+        <path d="M32 18c0-6 1-10 4-13"/><path d="M35 9c5-4 12-4 16 0-5 4-12 4-16 0z"/>
+      </svg>
+      <p class="testo" data-k="testo"></p>
+      <img class="foto" data-k="foto" alt="" hidden>
+    </div>
+    <div class="gruppo">
+      <div class="formato" data-k="formato"></div>
+      <div class="prezzi"><span class="prima" data-k="prezzo_prima"></span><span class="prezzo" data-k="prezzo"></span></div>
+      <div class="validita" data-k="validita"></div>
+    </div>
+  </div>
+  <div class="piede"><span><b>Negozio</b> · Via Angelo Cosenza 105, Meta (NA)</span><span>caseificioperrusio.com</span></div>
+</div>
+<script>
+  // ?f=post|story|a4  &dati=offerta-marmellata.json
+  const q = new URLSearchParams(location.search);
+  const tela = document.getElementById("tela");
+  tela.classList.add(q.get("f") || "post");
+  fetch(q.get("dati") || "offerta-marmellata.json").then(r => r.json()).then(d => {
+    for (const el of document.querySelectorAll("[data-k]")) {
+      const v = d[el.dataset.k];
+      if (!v) { el.hidden = true; continue; }
+      if (el.tagName === "IMG") { el.src = v; el.hidden = false; } else el.textContent = v;
+    }
+    document.fonts.ready.then(() => document.body.dataset.pronto = "1");
+  });
+</script>
+</body>
+</html>
