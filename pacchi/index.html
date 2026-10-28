@@ -1,177 +1,248 @@
 <title>Pacchi del giorno</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 :root{
   color-scheme:light;
-  --bg:#F8F9FC; --surface:#FFFFFF; --surface-2:#F2F4F8; --ink:#1B2033; --muted:#6E7590; --line:#E3E6EE;
-  --accent:#F2622E; --accent-ink:#FFFFFF; --accent-soft:#FFEDE5;
-  --done:#1D946A; --done-soft:#DDF2EA; --warn:#C8401A; --warn-soft:#FDE5DC;
-  --shadow:0 1px 2px rgba(22,26,43,.06),0 8px 24px rgba(22,26,43,.06);
+  --bg:#FBF7F2; --surface:#FFFFFF; --surface-2:#F5EFE7; --ink:#2A2320; --muted:#857A72; --line:#EDE4DA;
+  --accent:#E8643A; --accent-ink:#FFFFFF; --accent-soft:#FDE9E0;
+  --done:#2E9466; --done-soft:#E0F3E9; --warn:#C8401A; --warn-soft:#FCE4DA;
+  --shadow:0 1px 2px rgba(60,40,30,.05),0 6px 20px rgba(60,40,30,.07);
   --display:"Bricolage Grotesque",ui-rounded,system-ui,sans-serif;
   --body:"Figtree",system-ui,-apple-system,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --nav:68px;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+html,body{overscroll-behavior-y:none}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.4;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
 button,input,textarea,select{font:inherit;color:inherit}
-button{cursor:pointer}
+button{cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.97)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:18px 120px}
+[hidden]{display:none!important}
+.wrap{max-width:520px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 16px calc(var(--nav) + 40px + env(safe-area-inset-bottom))}
 
-header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-h1{font-family:var(--display);font-weight:800;font-size:34px;line-height:1;margin:4px 0 0;letter-spacing:-.02em}
-.sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
-.sync i{width:7px;height:7px;border-radius:50%;background:var(--done);display:inline-block}
-.sync.local i{background:var(--accent)}
+/* header */
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.hello{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.05;letter-spacing:-.02em;margin:0}
+.sub{margin-top:4px;color:var(--muted);font-size:15px}
+.sub::first-letter{text-transform:uppercase}
+.sync{margin-top:8px;width:10px;height:10px;border-radius:50%;background:var(--done);flex:none;box-shadow:0 0 0 4px var(--done-soft)}
+.sync.local{background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
 
-/* day nav */
-.daynav{margin-top:18px;display:flex;align-items:center;gap:8px}
-.daynav .nb{height:42px;min-width:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:18px}
-.daypick{flex:1;min-width:0;position:relative;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600}
-.daypick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
-.daypick .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.daypick .lbl::first-letter{text-transform:uppercase}
-.todaybtn{height:42px;border-radius:12px;border:0;background:var(--ink);color:var(--bg);font-weight:600;padding:0 14px}
-.todaybtn[hidden]{display:none}
+/* week strip */
+.weekhead{margin-top:20px;display:flex;align-items:center;justify-content:space-between}
+.weekhead b{font-family:var(--display);font-weight:800;font-size:18px}
+.weekhead b::first-letter{text-transform:uppercase}
+.wnav{display:flex;gap:6px}
+.wnav button{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:18px;font-weight:600}
+.week{margin-top:10px;display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.dcell{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.dcell .dl{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:.04em}
+.dcell .dn{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.15;font-variant-numeric:tabular-nums}
+.dcell .dc{font-size:11px;font-weight:700;min-height:15px;color:var(--accent)}
+.dcell.today .dn{color:var(--accent)}
+.dcell[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.dcell[aria-pressed="true"] .dl,.dcell[aria-pressed="true"] .dc{color:inherit;opacity:.8}
+.dcell[aria-pressed="true"].today .dn{color:#fff}
 
-/* stats */
-.stats{margin-top:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 10px 9px;min-width:0}
-.stat b{display:block;font-family:var(--display);font-weight:800;font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
-.stat span{display:block;margin-top:4px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stat.ok b{color:var(--done)} .stat.ko b{color:var(--warn)}
-.bar{height:6px;background:var(--line);border-radius:6px;margin-top:10px;overflow:hidden;display:flex}
-.bar i{display:block;height:100%;transition:width .4s cubic-bezier(.2,.8,.2,1)}
+/* summary */
+.hero{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
+.hero .big{font-family:var(--display);font-weight:800;font-size:23px;line-height:1.15;letter-spacing:-.01em;text-wrap:balance}
+.hero .small{margin-top:6px;color:var(--muted);font-size:15px;text-wrap:pretty}
+.seg{display:flex;gap:3px;height:8px;margin-top:14px}
+.seg i{display:block;height:100%;border-radius:4px;transition:flex-grow .4s}
+.legend{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
 
-/* reminder */
-.remind{margin-top:12px;width:100%;text-align:left;border:1px solid #F6C9B6;background:var(--accent-soft);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:10px;font-weight:600;color:#8A3413}
-.remind[hidden]{display:none}
-.remind .n{font-family:var(--display);font-weight:800;font-size:20px}
-.remind .go{margin-left:auto;font-size:14px;white-space:nowrap}
+.nudge{margin-top:12px;width:100%;text-align:left;border:0;background:var(--accent-soft);border-radius:16px;padding:13px 14px;display:flex;align-items:center;gap:12px;color:#8A3413;font-weight:600;font-size:15px}
+.nudge .em{font-size:24px}
+.nudge .go{margin-left:auto;font-size:22px;opacity:.6}
 
-/* tools */
-.tools{margin-top:16px;display:flex;gap:8px}
-.search{flex:1;min-width:0;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:0 14px}
-.iconbtn{flex:none;height:44px;min-width:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-weight:600;font-size:14px;padding:0 12px}
-.chips{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 0;padding:2px 16px 6px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 13px;font-weight:600;font-size:14px}
-.chip .n{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:500}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.chip[aria-pressed="true"] .n{color:inherit;opacity:.7}
-.sdot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
-
-.sect{margin:20px 0 8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+h2{font-family:var(--display);font-weight:800;font-size:24px;margin:24px 0 10px;letter-spacing:-.01em}
+h3.grp{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:20px 0 8px}
 
 /* cards */
 .list{display:flex;flex-direction:column;gap:10px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);border-left:5px solid var(--sc,var(--line))}
-.row1{display:flex;align-items:center;gap:8px;min-width:0}
-.carrier{flex:none;font-size:12px;font-weight:600;background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:2px 7px}
-.trk{font-family:var(--mono);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;border:0;background:none;padding:0;text-align:left}
-.trk.none{color:var(--muted);font-family:var(--body);font-style:italic}
-.pill{margin-left:auto;flex:none;appearance:none;-webkit-appearance:none;border:0;border-radius:999px;padding:6px 26px 6px 11px;font-size:13px;font-weight:600;background:var(--ss) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%231B2033' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;color:var(--sc)}
-.who{margin-top:7px;font-weight:600;overflow-wrap:anywhere}
-.who span{font-weight:400;color:var(--muted)}
-.note{margin-top:3px;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
-.row3{margin-top:9px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-right:auto}
-.act{height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600;padding:0 10px;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center}
-.act.trkl{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.card{width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:13px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.av{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;font-size:17px;color:#fff}
+.cbody{flex:1;min-width:0}
+.cname{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cline{margin-top:2px;font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{flex:none;display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 10px;font-size:13px;font-weight:700;background:var(--ss);color:var(--sc);white-space:nowrap}
 
-.empty{text-align:center;color:var(--muted);padding:36px 12px;border:1.5px dashed var(--line);border-radius:16px}
+.empty{text-align:center;color:var(--muted);padding:34px 16px;border:1.5px dashed var(--line);border-radius:20px;font-size:15px}
+.empty .em{font-size:40px;display:block;margin-bottom:6px}
 .empty b{display:block;color:var(--ink);font-family:var(--display);font-size:20px;margin-bottom:4px}
 
-.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom));height:54px;border-radius:16px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:17px;padding:0 24px;box-shadow:0 8px 24px rgba(242,98,46,.35);display:flex;align-items:center;gap:8px;z-index:5}
-.fab span{font-size:24px;line-height:1;margin-top:-2px}
+/* search */
+.search{width:100%;height:52px;border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:0 16px;font-size:17px;margin-top:16px}
 
-/* sheet */
-.scrim{position:fixed;inset:0;background:rgba(20,24,40,.38);z-index:10;display:flex;align-items:flex-end;justify-content:center}
-.scrim[hidden]{display:none}
-.sheet{background:var(--surface);width:100%;max-width:640px;border-radius:22px 22px 0 0;padding:18px 16px max(18px,env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
-.sheet h3{font-family:var(--display);font-weight:800;font-size:24px;margin:0 0 12px;letter-spacing:-.01em}
-.f{display:block;margin-top:10px}
-.f>span{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px}
-.f input,.f textarea,.f select{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:11px 12px;font-size:16px}
-.f textarea{resize:vertical;min-height:60px}
-.f input.mono{font-family:var(--mono)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.cgrid{display:flex;flex-wrap:wrap;gap:6px}
-.cgrid button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 11px;font-weight:600;font-size:14px}
-.cgrid button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.sbtns{margin-top:16px;display:flex;gap:8px}
-.sbtns button{flex:1;height:48px;border-radius:13px;font-weight:600;border:1px solid var(--line);background:var(--surface)}
-.sbtns .pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.del{margin-top:10px;width:100%;height:42px;border:0;background:none;color:var(--warn);font-weight:600}
-.del[hidden]{display:none}
+/* month */
+.mstats{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mstat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
+.mstat b{display:block;font-family:var(--display);font-weight:800;font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+.mstat span{display:block;margin-top:4px;font-size:13px;color:var(--muted)}
+.cbar{display:grid;grid-template-columns:72px 1fr 32px;align-items:center;gap:10px;margin-top:10px;font-size:15px}
+.cbar .tr{height:12px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.cbar .tr i{display:block;height:100%;background:var(--accent);border-radius:6px}
+.cbar .n{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.wide{width:100%;height:54px;border-radius:16px;border:1px solid var(--line);background:var(--surface);font-weight:700;margin-top:18px}
 
-.toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
-.toast[hidden]{display:none}
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.nav .in{max-width:520px;margin:0 auto;height:var(--nav);display:grid;grid-template-columns:1fr 1fr 84px 1fr 1fr;align-items:center}
+.tab{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:600;color:var(--muted);height:100%;justify-content:center;position:relative}
+.tab svg{width:24px;height:24px}
+.tab[aria-current="page"]{color:var(--accent)}
+.tab .dot{position:absolute;top:8px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px}
+.plus{justify-self:center;width:62px;height:62px;border-radius:50%;border:0;background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(232,100,58,.4);margin-top:-26px;display:grid;place-items:center}
+.plus svg{width:30px;height:30px}
 
-@media (max-width:420px){
-  .stat b{font-size:22px}
-  h1{font-size:30px}
+/* sheets */
+.scrim{position:fixed;inset:0;background:rgba(40,28,22,.4);z-index:10;display:flex;align-items:flex-end;justify-content:center;animation:fade .18s}
+.sheet{background:var(--surface);width:100%;max-width:520px;border-radius:26px 26px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom));max-height:94vh;overflow:auto;animation:up .24s cubic-bezier(.2,.8,.2,1)}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+@keyframes fade{from{opacity:0}}
+.sheet h3{font-family:var(--display);font-weight:800;font-size:25px;margin:0 0 4px;letter-spacing:-.01em}
+.sheet .lead{color:var(--muted);font-size:15px;margin:0 0 8px}
+.f{display:block;margin-top:14px}
+.f>span{display:block;font-size:15px;font-weight:700;margin-bottom:6px}
+.f input,.f textarea{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:14px;padding:13px 14px;font-size:17px}
+.f textarea{resize:vertical;min-height:70px}
+.mono{font-family:var(--mono)}
+.trkrow{display:flex;gap:8px}
+.trkrow input{flex:1;min-width:0}
+.trkrow button{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:0 14px;font-weight:600;font-size:15px}
+.cgrid{display:flex;flex-wrap:wrap;gap:8px}
+.cgrid button{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;font-weight:600;font-size:15px;min-height:44px}
+.cgrid button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.row2{display:flex;gap:12px}
+.row2>.f{flex:1;min-width:0}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);background:var(--surface-2);border-radius:14px;height:50px}
+.stepper button{width:48px;height:100%;border:0;background:none;font-size:22px;font-weight:600}
+.stepper output{flex:1;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.sbtns{margin-top:20px;display:flex;flex-direction:column;gap:8px}
+.sbtns button{height:54px;border-radius:16px;font-weight:700;border:1px solid var(--line);background:var(--surface)}
+.sbtns .pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.linkbtn{border:0;background:none;color:var(--muted);font-weight:600;height:44px;width:100%}
+.linkbtn.warn{color:var(--warn)}
+
+/* detail */
+.dhead{display:flex;align-items:center;gap:14px}
+.dhead .av{width:58px;height:58px;font-size:21px}
+.dinfo{margin-top:14px;background:var(--surface-2);border-radius:16px;padding:4px 14px}
+.dinfo div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.dinfo div:last-child{border-bottom:0}
+.dinfo dt{color:var(--muted)}
+.dinfo dd{margin:0;font-weight:600;text-align:right;overflow-wrap:anywhere;min-width:0}
+.dinfo dd.mono{font-weight:500}
+.sheet h3.grp{font-family:var(--body);font-weight:700;font-size:13px;letter-spacing:.06em;margin:22px 0 8px}
+.stlist{margin-top:0;display:flex;flex-direction:column;gap:8px}
+.stbtn{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);background:var(--surface);border-radius:16px;padding:12px 14px;text-align:left;min-height:56px}
+.stbtn .em{font-size:22px;width:28px;text-align:center}
+.stbtn b{display:block;font-size:16px}
+.stbtn small{display:block;color:var(--muted);font-size:13px}
+.stbtn[aria-pressed="true"]{border-color:var(--sc);background:var(--ss)}
+.stbtn[aria-pressed="true"] b{color:var(--sc)}
+.stbtn .ck{margin-left:auto;font-weight:800;color:var(--sc)}
+.actrow{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.actrow a,.actrow button{height:52px;border-radius:16px;border:1px solid var(--line);background:var(--surface);font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;color:var(--ink);font-size:16px}
+.actrow a{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--nav) + 22px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:16px;font-size:15px;font-weight:600;z-index:20;width:max-content;max-width:calc(100% - 32px);box-shadow:var(--shadow);text-align:center;animation:up .2s}
+
+@media (max-width:360px){
+  .hello{font-size:26px}
+  .dcell .dn{font-size:17px}
+  .hero .big{font-size:20px}
 }
 </style>
 
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="kicker" id="kicker">Spedizioni</div>
-      <h1>Pacchi</h1>
+      <h1 class="hello" id="hello">Ciao!</h1>
+      <div class="sub" id="sub"></div>
     </div>
-    <div class="sync" id="sync"><i></i><span>Collegamento…</span></div>
+    <span class="sync" id="sync" title="Collegamento…"></span>
   </header>
 
-  <div class="daynav">
-    <button class="nb" id="prev" aria-label="Giorno precedente">‹</button>
-    <label class="daypick"><span class="lbl" id="dayLbl"></span><input type="date" id="dayIn" aria-label="Scegli giorno"></label>
-    <button class="nb" id="next" aria-label="Giorno successivo">›</button>
-    <button class="todaybtn" id="todayBtn" hidden>Oggi</button>
-  </div>
+  <!-- GIORNO -->
+  <section id="v-giorno">
+    <div class="weekhead"><b id="wLbl"></b>
+      <div class="wnav"><button id="wPrev" aria-label="Settimana prima">‹</button><button id="wNext" aria-label="Settimana dopo">›</button></div>
+    </div>
+    <div class="week" id="week"></div>
+    <div class="hero" id="hero"></div>
+    <button class="nudge" id="nudge" hidden></button>
+    <h2 id="dayTitle"></h2>
+    <div class="list" id="dayList"></div>
+  </section>
 
-  <div class="stats" id="stats"></div>
-  <div class="bar" id="bar"></div>
+  <!-- DA SEGUIRE -->
+  <section id="v-seguire" hidden>
+    <h2>Da seguire</h2>
+    <p class="sub" style="margin-top:-4px">I pacchi che non sono ancora arrivati, dal più vecchio.</p>
+    <div id="openList"></div>
+  </section>
 
-  <button class="remind" id="remind" hidden></button>
+  <!-- CERCA -->
+  <section id="v-cerca" hidden>
+    <h2>Cerca un pacco</h2>
+    <input class="search" id="q" type="search" placeholder="Nome, città o numero di tracking" autocomplete="off" enterkeyhint="search">
+    <div class="list" id="findList" style="margin-top:14px"></div>
+  </section>
 
-  <div class="tools">
-    <input class="search" id="q" type="search" placeholder="Cerca tracking, nome, città…" autocomplete="off">
-    <button class="iconbtn" id="csv" title="Esporta il giorno in CSV">CSV</button>
-  </div>
-  <div class="chips" id="chips"></div>
-
-  <div class="sect"><span id="sectT"></span><span id="sectN"></span></div>
-  <div class="list" id="list"></div>
+  <!-- MESE -->
+  <section id="v-mese" hidden>
+    <div class="weekhead" style="margin-top:22px"><b id="mLbl"></b>
+      <div class="wnav"><button id="mPrev" aria-label="Mese prima">‹</button><button id="mNext" aria-label="Mese dopo">›</button></div>
+    </div>
+    <div id="mBody"></div>
+  </section>
 </div>
 
-<button class="fab" id="fab"><span>+</span> Nuovo pacco</button>
+<nav class="nav"><div class="in">
+  <button class="tab" data-v="giorno" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Giorno</button>
+  <button class="tab" data-v="seguire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7h11v9h-11zM13.5 10h4l3 3v3h-7"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Da seguire<span class="dot" id="openDot" hidden></span></button>
+  <button class="plus" id="plus" aria-label="Aggiungi un pacco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button class="tab" data-v="cerca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>Cerca</button>
+  <button class="tab" data-v="mese"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Mese</button>
+</div></nav>
 
-<div class="scrim" id="scrim" hidden>
+<!-- form -->
+<div class="scrim" id="formScrim" hidden>
   <form class="sheet" id="form" autocomplete="off">
+    <div class="grab"></div>
     <h3 id="fTitle">Nuovo pacco</h3>
-    <label class="f"><span>Numero di tracking</span><input class="mono" name="tracking" id="fTrk" placeholder="Es. 1Z999AA10123456784" autocapitalize="characters" spellcheck="false"></label>
-    <div class="f"><span>Corriere</span><div class="cgrid" id="fCar"></div></div>
-    <div class="two">
-      <label class="f"><span>Destinatario</span><input name="destinatario" placeholder="Nome o azienda"></label>
-      <label class="f"><span>Città</span><input name="citta" placeholder="Es. Milano"></label>
+    <p class="lead" id="fLead"></p>
+    <label class="f"><span>A chi lo mandi?</span><input name="destinatario" placeholder="Nome, cognome o negozio" autocapitalize="words" enterkeyhint="next"></label>
+    <label class="f"><span>Dove va?</span><input name="citta" placeholder="Città" autocapitalize="words" enterkeyhint="next"></label>
+    <div class="f"><span>Con quale corriere?</span><div class="cgrid" id="fCar"></div></div>
+    <label class="f"><span>Numero di tracking</span>
+      <div class="trkrow"><input class="mono" name="tracking" id="fTrk" placeholder="Lo trovi sull'etichetta" autocapitalize="characters" spellcheck="false" enterkeyhint="done"><button type="button" id="fPaste">Incolla</button></div>
+    </label>
+    <div class="row2">
+      <div class="f"><span>Colli</span><div class="stepper"><button type="button" id="cMinus" aria-label="Meno">−</button><output id="cOut">1</output><button type="button" id="cPlus" aria-label="Più">+</button></div></div>
+      <label class="f"><span>Spedito il</span><input type="date" name="data" required></label>
     </div>
-    <div class="two">
-      <label class="f"><span>Data spedizione</span><input type="date" name="data" required></label>
-      <label class="f"><span>Colli</span><input type="number" name="colli" min="1" step="1" value="1" inputmode="numeric"></label>
-    </div>
-    <label class="f"><span>Stato</span><select name="stato" id="fStato"></select></label>
-    <label class="f"><span>Note</span><textarea name="note" placeholder="Ordine, contenuto, riferimenti…"></textarea></label>
+    <label class="f"><span>Una nota <span style="font-weight:400;color:var(--muted)">(se serve)</span></span><textarea name="note" placeholder="Es. ordine n. 1042, fragile, citofono Rossi…"></textarea></label>
     <div class="sbtns">
-      <button type="button" id="fCancel">Annulla</button>
-      <button type="button" id="fMore">Salva e un altro</button>
-      <button type="submit" class="pri">Salva</button>
+      <button type="submit" class="pri" id="fSave">Salva pacco</button>
+      <button type="button" id="fMore">Salva e aggiungine un altro</button>
+      <button type="button" class="linkbtn" id="fCancel">Annulla</button>
     </div>
-    <button type="button" class="del" id="fDel" hidden>Elimina pacco</button>
   </form>
+</div>
+
+<!-- detail -->
+<div class="scrim" id="detScrim" hidden>
+  <div class="sheet" id="det"></div>
 </div>
 
 <div class="toast" id="toast" hidden></div>
@@ -194,18 +265,22 @@ const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())
 const today = () => ymd(new Date());
 const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
 const shift = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
-const nice = (s, opt = { weekday: "long", day: "numeric", month: "long" }) => parse(s).toLocaleDateString("it-IT", opt);
+const fmt = (s, opt) => parse(s).toLocaleDateString("it-IT", opt);
+const daysAgo = s => Math.round((parse(today()) - parse(s)) / 864e5);
+const relDay = s => { const n = daysAgo(s); return n === 0 ? "oggi" : n === 1 ? "ieri" : n === -1 ? "domani" : n > 1 ? `${n} giorni fa` : fmt(s, { day: "numeric", month: "short" }); };
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const buzz = () => { try { navigator.vibrate?.(12); } catch {} };
+const plural = (n, one, many) => n === 1 ? one : many.replace("#", n);
 
 const STATI = [
-  { k: "preparato",  l: "Preparato",   c: "#5A6178", s: "#EEF0F5" },
-  { k: "spedito",    l: "Spedito",     c: "#2F6FE4", s: "#E4EDFD" },
-  { k: "transito",   l: "In transito", c: "#A97A00", s: "#FBF1D6" },
-  { k: "consegnato", l: "Consegnato",  c: "#1D946A", s: "#DDF2EA" },
-  { k: "problema",   l: "Problema",    c: "#C8401A", s: "#FDE5DC" },
+  { k: "preparato",  l: "Da spedire", em: "📦", d: "Pronto, ma non ancora partito",  c: "#7A6A5E", s: "#F1EAE2" },
+  { k: "spedito",    l: "Al corriere", em: "🤝", d: "L'hai consegnato al corriere",  c: "#2F6FE4", s: "#E5EDFD" },
+  { k: "transito",   l: "In viaggio", em: "🚚", d: "Sta viaggiando verso il destinatario", c: "#A26F00", s: "#FBF0D3" },
+  { k: "consegnato", l: "Arrivato",   em: "✅", d: "Il destinatario l'ha ricevuto",  c: "#2E9466", s: "#E0F3E9" },
+  { k: "problema",   l: "Problema",   em: "⚠️", d: "Giacenza, ritardo o danno",      c: "#C8401A", s: "#FCE4DA" },
 ];
 const ST = Object.fromEntries(STATI.map(s => [s.k, s]));
-const OPEN = new Set(["preparato", "spedito", "transito", "problema"]);
+const isOpen = p => p.stato !== "consegnato";
 
 const enc = encodeURIComponent;
 const CARRIERS = {
@@ -219,6 +294,15 @@ const CARRIERS = {
   "InPost": t => "https://parcelsapp.com/it/tracking/" + enc(t),
   "Altro":  t => "https://parcelsapp.com/it/tracking/" + enc(t),
 };
+const AVC = ["#E8643A","#2F6FE4","#2E9466","#9B51E0","#C9850C","#D9467A","#0E9AA7","#5C6AC4"];
+function avatar(p){
+  const name = (p.destinatario || p.citta || p.tracking || "?").trim();
+  const ini = name.split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "?";
+  let h = 0; for (const ch of name.toLowerCase()) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return el("span", { class: "av", style: "background:" + AVC[h % AVC.length], "aria-hidden": "true" }, ini);
+}
+const who = p => p.destinatario || (p.citta ? "Pacco per " + p.citta : "Pacco senza nome");
+const first = p => (p.destinatario || "").split(/\s+/)[0];
 
 const ls = {
   get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
@@ -226,17 +310,15 @@ const ls = {
 };
 
 let db = null, mode = "loading", pacchi = [];
-let day = today(), filter = "tutti", query = "", showOld = false, editing = null;
+let view = "giorno", day = today(), month = today().slice(0, 7), query = "", editing = null, detailId = null;
 let lastCarrier = ls.get("pacchi.carrier") || "BRT";
 const chains = {};
-
-$("#kicker").textContent = nice(today(), { weekday: "long", day: "numeric", month: "long" });
 
 /* ---------- persistence ---------- */
 function setSync(kind){
   const s = $("#sync");
   s.classList.toggle("local", kind === "local");
-  s.querySelector("span").textContent = kind === "cloud" ? "Sincronizzato" : kind === "local" ? "Solo su questo dispositivo" : "Collegamento…";
+  s.title = kind === "cloud" ? "Sincronizzato su tutti i tuoi dispositivi" : kind === "local" ? "Salvato solo su questo telefono" : "Collegamento…";
 }
 function save(p){
   p.updated = Date.now();
@@ -244,11 +326,11 @@ function save(p){
   const { id, ...body } = JSON.parse(JSON.stringify(p));
   chains[id] = (chains[id] || Promise.resolve())
     .then(() => db.doc("pacchi/" + id).set(body))
-    .catch(e => toast(e?.code === "quota_exceeded" ? "Spazio pieno: esporta ed elimina i pacchi vecchi." : "Modifica non salvata, riprova."));
+    .catch(e => toast(e?.code === "quota_exceeded" ? "Lo spazio è pieno: scarica il mese ed elimina i pacchi vecchi." : "Ops, non sono riuscito a salvare. Riprova tra un attimo."));
 }
 function remove(id){
   if (mode !== "cloud") { ls.set("pacchi.local", pacchi); return; }
-  (chains[id] || Promise.resolve()).then(() => db.doc("pacchi/" + id).delete()).catch(() => toast("Non riesco a eliminare il pacco."));
+  (chains[id] || Promise.resolve()).then(() => db.doc("pacchi/" + id).delete()).catch(() => toast("Non sono riuscito a eliminarlo. Riprova."));
 }
 function startLocal(){
   mode = "local"; setSync("local");
@@ -265,193 +347,292 @@ async function boot(){
     pacchi = snap.docs.map(d => ({ stato: "spedito", colli: 1, ...JSON.parse(JSON.stringify(d.data())), id: d.id }))
       .filter(p => typeof p.data === "string");
     render();
-  }, () => { setSync("local"); toast("Connessione persa. Ricarica la pagina."); });
+    if (detailId) { const p = pacchi.find(x => x.id === detailId); p ? drawDetail(p) : closeDetail(); }
+  }, () => { setSync("local"); toast("Ho perso la connessione. Ricarica la pagina."); });
 }
 
-/* ---------- render ---------- */
+/* ---------- shared pieces ---------- */
 const byNew = (a, b) => (b.created || 0) - (a.created || 0);
-function matches(p, q){
-  return [p.tracking, p.destinatario, p.citta, p.note, p.corriere].some(v => (v || "").toLowerCase().includes(q));
-}
-function render(){
-  const isToday = day === today();
-  $("#dayLbl").textContent = isToday ? "Oggi · " + nice(day, { day: "numeric", month: "long" }) : nice(day);
-  $("#dayIn").value = day;
-  $("#todayBtn").hidden = isToday;
-
-  const ofDay = pacchi.filter(p => p.data === day);
-  const cnt = k => ofDay.filter(p => p.stato === k).length;
-  const tot = ofDay.length, ok = cnt("consegnato"), ko = cnt("problema"), moving = tot - ok - ko;
-  const colli = ofDay.reduce((s, p) => s + (Number(p.colli) || 1), 0);
-  $("#stats").replaceChildren(
-    el("div", { class: "stat" }, el("b", {}, String(tot)), el("span", {}, colli !== tot ? colli + " colli" : "Spediti")),
-    el("div", { class: "stat" }, el("b", {}, String(moving)), el("span", {}, "In viaggio")),
-    el("div", { class: "stat ok" }, el("b", {}, String(ok)), el("span", {}, "Arrivati")),
-    el("div", { class: "stat ko" }, el("b", {}, String(ko)), el("span", {}, "Problemi")),
-  );
-  $("#bar").replaceChildren(...(tot ? STATI.map(s => el("i", { style: `width:${cnt(s.k) / tot * 100}%;background:${s.c}` })) : []));
-
-  // older parcels still open
-  const old = pacchi.filter(p => p.data < day && OPEN.has(p.stato) && p.data >= shift(day, -60));
-  const r = $("#remind");
-  r.hidden = !old.length || !!query;
-  r.replaceChildren(el("span", { class: "n" }, String(old.length)),
-    el("span", {}, old.length === 1 ? "pacco dei giorni scorsi non ancora consegnato" : "pacchi dei giorni scorsi non ancora consegnati"),
-    el("span", { class: "go" }, showOld ? "Nascondi" : "Mostra"));
-
-  // chips
-  const base = query ? pacchi.filter(p => matches(p, query)) : ofDay;
-  const chipCount = k => k === "tutti" ? base.length : base.filter(p => p.stato === k).length;
-  $("#chips").replaceChildren(...[{ k: "tutti", l: "Tutti" }, ...STATI].map(s =>
-    el("button", { class: "chip", "aria-pressed": String(filter === s.k), onclick: () => { filter = s.k; render(); } },
-      s.c ? el("i", { class: "sdot", style: "background:" + s.c }) : null, s.l, el("span", { class: "n" }, String(chipCount(s.k))))));
-
-  // list
-  const shown = base.filter(p => filter === "tutti" || p.stato === filter)
-    .sort(query ? (a, b) => (a.data < b.data ? 1 : a.data > b.data ? -1 : byNew(a, b)) : byNew);
-  const nPacchi = n => n ? n + (n === 1 ? " pacco" : " pacchi") : "";
-  const title = query ? "Risultati in tutti i giorni" : isToday ? "Spediti oggi" : "Spediti il " + nice(day, { day: "numeric", month: "long" });
-  const withOld = showOld && old.length && !query;
-  $("#sectT").textContent = withOld ? "Da seguire" : title;
-  $("#sectN").textContent = nPacchi(withOld ? old.length : shown.length);
-
-  const list = $("#list");
-  const nodes = [];
-  if (withOld) {
-    old.sort((a, b) => a.data < b.data ? -1 : 1).forEach(p => nodes.push(card(p, true)));
-    nodes.push(el("div", { class: "sect" }, el("span", {}, title), el("span", {}, nPacchi(shown.length))));
-  }
-  if (!shown.length) {
-    nodes.push(el("div", { class: "empty" },
-      el("b", {}, query ? "Nessun risultato" : mode === "loading" ? "Caricamento…" : "Nessun pacco"),
-      query ? "Prova con un altro numero o nome." : filter !== "tutti" ? "Nessun pacco con questo stato." : "Tocca «Nuovo pacco» per registrare una spedizione."));
-  } else shown.forEach(p => nodes.push(card(p, !!query)));
-  list.replaceChildren(...nodes);
-}
-
-function card(p, withDate){
+function card(p, when){
   const s = ST[p.stato] || ST.spedito;
-  const sel = el("select", { class: "pill", "aria-label": "Stato", onchange: e => { p.stato = e.target.value; save(p); render(); toast(ST[p.stato].l); } },
-    STATI.map(x => el("option", { value: x.k, selected: x.k === p.stato }, x.l)));
-  const trk = p.tracking
-    ? el("button", { class: "trk", title: "Copia", onclick: () => copy(p.tracking) }, p.tracking)
-    : el("span", { class: "trk none" }, "senza tracking");
-  const meta = [withDate ? nice(p.data, { day: "numeric", month: "short" }) : null,
-    (Number(p.colli) || 1) > 1 ? p.colli + " colli" : null].filter(Boolean).join(" · ");
-  const link = p.tracking && (CARRIERS[p.corriere] || CARRIERS.Altro)(p.tracking);
-  return el("article", { class: "card", style: `--sc:${s.c};--ss:${s.s}` },
-    el("div", { class: "row1" }, el("span", { class: "carrier" }, p.corriere || "—"), trk, sel),
-    p.destinatario || p.citta ? el("div", { class: "who" }, p.destinatario || "", p.citta ? el("span", {}, (p.destinatario ? " · " : "") + p.citta) : null) : null,
-    p.note ? el("div", { class: "note" }, p.note) : null,
-    el("div", { class: "row3" },
-      el("span", { class: "meta" }, meta),
-      p.stato !== "consegnato" ? el("button", { class: "act", onclick: () => { p.stato = "consegnato"; save(p); render(); toast("Segnato come consegnato"); } }, "✓ Consegnato") : null,
-      el("button", { class: "act", onclick: () => openForm(p) }, "Modifica"),
-      link ? el("a", { class: "act trkl", href: link, target: "_blank", rel: "noopener" }, "Traccia ↗") : null));
+  const bits = [p.citta, p.corriere, when ? relDay(p.data) : null, (Number(p.colli) || 1) > 1 ? p.colli + " colli" : null].filter(Boolean);
+  return el("button", { class: "card", onclick: () => openDetail(p) },
+    avatar(p),
+    el("span", { class: "cbody" },
+      el("span", { class: "cname", style: "display:block" }, who(p)),
+      el("span", { class: "cline", style: "display:block" }, bits.join(" · ") || "Nessun dettaglio")),
+    el("span", { class: "badge", style: `--sc:${s.c};--ss:${s.s}` }, s.em, " ", s.l));
 }
+function empty(em, title, text){ return el("div", { class: "empty" }, el("span", { class: "em" }, em), el("b", {}, title), text); }
+
+/* ---------- views ---------- */
+function render(){
+  const h = new Date().getHours();
+  $("#hello").textContent = h < 5 ? "Ancora sveglio? 🌙" : h < 13 ? "Buongiorno ☀️" : h < 18 ? "Buon pomeriggio 👋" : "Buonasera 🌆";
+  $("#sub").textContent = fmt(today(), { weekday: "long", day: "numeric", month: "long" });
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-current", t.dataset.v === view ? "page" : "false"));
+  for (const v of ["giorno", "seguire", "cerca", "mese"]) $("#v-" + v).hidden = v !== view;
+  const open = pacchi.filter(isOpen);
+  $("#openDot").hidden = !open.length; $("#openDot").textContent = open.length > 99 ? "99+" : open.length;
+  ({ giorno: renderDay, seguire: renderOpen, cerca: renderFind, mese: renderMonth })[view]();
+}
+
+function renderDay(){
+  // week strip
+  const d0 = parse(day), mon = shift(day, -((d0.getDay() + 6) % 7));
+  $("#wLbl").textContent = fmt(day, { month: "long", year: "numeric" });
+  $("#week").replaceChildren(...Array.from({ length: 7 }, (_, i) => {
+    const d = shift(mon, i), n = pacchi.filter(p => p.data === d).length;
+    return el("button", { class: "dcell" + (d === today() ? " today" : ""), "aria-pressed": String(d === day), "aria-label": fmt(d, { weekday: "long", day: "numeric", month: "long" }) + ", " + plural(n, "1 pacco", "# pacchi"), onclick: () => { day = d; buzz(); render(); } },
+      el("span", { class: "dl" }, fmt(d, { weekday: "short" }).slice(0, 3)),
+      el("span", { class: "dn" }, String(parse(d).getDate())),
+      el("span", { class: "dc" }, n ? String(n) : ""));
+  }));
+
+  // summary
+  const isToday = day === today(), ofDay = pacchi.filter(p => p.data === day).sort(byNew);
+  const n = k => ofDay.filter(p => p.stato === k).length, tot = ofDay.length;
+  const ok = n("consegnato"), ko = n("problema"), moving = tot - ok - ko - n("preparato"), ready = n("preparato");
+  const when = isToday ? "Oggi" : daysAgo(day) === 1 ? "Ieri" : daysAgo(day) < 0 ? "Quel giorno" : "Il " + fmt(day, { day: "numeric", month: "long" });
+  let big, small;
+  if (!tot) {
+    big = isToday ? "Oggi non è ancora partito nessun pacco." : daysAgo(day) < 0 ? "Questo giorno deve ancora arrivare." : when + " non hai registrato spedizioni.";
+    small = isToday ? "Quando ne prepari uno, tocca il + qui sotto e lo segniamo insieme." : "Se te ne sei dimenticato uno, puoi aggiungerlo ora con il +.";
+  } else {
+    big = `${when} ${plural(tot, "è partito 1 pacco", "sono partiti # pacchi")}${tot >= 10 ? ". Bella giornata! 💪" : "."}`;
+    if (ok === tot) small = plural(tot, "È già arrivato a destinazione. 🎉", "Sono già arrivati tutti. Ottimo lavoro! 🎉");
+    else {
+      const parts = [
+        ok && plural(ok, "1 è già arrivato", "# sono già arrivati"),
+        moving && plural(moving, "1 è in viaggio", "# sono in viaggio"),
+        ready && plural(ready, "1 è ancora da spedire", "# sono ancora da spedire"),
+        ko && plural(ko, "1 ha bisogno di attenzione", "# hanno bisogno di attenzione"),
+      ].filter(Boolean);
+      small = (parts.length > 1 ? parts.slice(0, -1).join(", ") + " e " + parts.at(-1) : parts[0]) + ".";
+      small = small[0].toUpperCase() + small.slice(1);
+    }
+  }
+  $("#hero").replaceChildren(
+    el("div", { class: "big" }, big), el("div", { class: "small" }, small),
+    tot ? el("div", { class: "seg" }, STATI.filter(s => n(s.k)).map(s => el("i", { style: `flex-grow:${n(s.k)};background:${s.c}` }))) : null,
+    tot ? el("div", { class: "legend" }, STATI.filter(s => n(s.k)).map(s => el("span", {}, el("i", { style: "background:" + s.c }), `${n(s.k)} ${s.l.toLowerCase()}`))) : null);
+
+  // older still open
+  const old = pacchi.filter(p => isOpen(p) && p.data < today());
+  const probs = old.filter(p => p.stato === "problema").length;
+  $("#nudge").hidden = !isToday || !old.length;
+  $("#nudge").replaceChildren(el("span", { class: "em" }, probs ? "⚠️" : "🚚"),
+    el("span", {}, probs ? plural(probs, "Un pacco dei giorni scorsi ha un problema", "# pacchi dei giorni scorsi hanno un problema")
+      : plural(old.length, "C'è ancora 1 pacco dei giorni scorsi per strada", "Ci sono ancora # pacchi dei giorni scorsi per strada")),
+    el("span", { class: "go" }, "›"));
+
+  $("#dayTitle").textContent = tot ? (isToday ? "I pacchi di oggi" : "I pacchi di " + fmt(day, { weekday: "long" })) : "";
+  $("#dayTitle").hidden = !tot;
+  $("#dayList").replaceChildren(...(tot ? ofDay.map(p => card(p)) : []));
+}
+
+function renderOpen(){
+  const open = pacchi.filter(isOpen).sort((a, b) => a.data < b.data ? -1 : a.data > b.data ? 1 : byNew(b, a));
+  const box = $("#openList");
+  if (!open.length) { box.replaceChildren(empty("🎉", "Tutto arrivato!", "Non c'è nessun pacco in sospeso. Goditi il momento.")); return; }
+  const groups = [
+    ["Hanno un problema", open.filter(p => p.stato === "problema")],
+    ["In giro da più di 5 giorni", open.filter(p => p.stato !== "problema" && daysAgo(p.data) > 5)],
+    ["Ancora in viaggio", open.filter(p => p.stato !== "problema" && daysAgo(p.data) <= 5)],
+  ].filter(g => g[1].length);
+  box.replaceChildren(...groups.flatMap(([t, ps]) => [el("h3", { class: "grp" }, `${t} · ${ps.length}`), el("div", { class: "list" }, ps.map(p => card(p, true)))]));
+}
+
+function renderFind(){
+  const box = $("#findList");
+  if (!query) { box.replaceChildren(empty("🔎", "Chi stai cercando?", "Scrivi un nome, una città o anche solo una parte del tracking.")); return; }
+  const q = query.toLowerCase().replace(/\s+/g, " ");
+  const hits = pacchi.filter(p => [p.tracking, p.destinatario, p.citta, p.note, p.corriere].some(v => (v || "").toLowerCase().includes(q)))
+    .sort((a, b) => a.data < b.data ? 1 : a.data > b.data ? -1 : byNew(a, b));
+  box.replaceChildren(...(hits.length ? hits.slice(0, 200).map(p => card(p, true)) : [empty("🤔", "Non trovo niente", `Nessun pacco corrisponde a «${query}».`)]));
+}
+
+function renderMonth(){
+  const [y, m] = month.split("-").map(Number);
+  $("#mLbl").textContent = new Date(y, m - 1, 1).toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+  const rows = pacchi.filter(p => p.data.startsWith(month));
+  const box = $("#mBody");
+  if (!rows.length) { box.replaceChildren(empty("🗓️", "Mese tranquillo", "In questo mese non ci sono spedizioni registrate.")); return; }
+  const ok = rows.filter(p => p.stato === "consegnato").length, ko = rows.filter(p => p.stato === "problema").length;
+  const colli = rows.reduce((s, p) => s + (Number(p.colli) || 1), 0);
+  const days = new Set(rows.map(p => p.data)).size;
+  const byC = {}; rows.forEach(p => byC[p.corriere || "Altro"] = (byC[p.corriere || "Altro"] || 0) + 1);
+  const cs = Object.entries(byC).sort((a, b) => b[1] - a[1]), max = cs[0][1];
+  box.replaceChildren(
+    el("div", { class: "hero" },
+      el("div", { class: "big" }, `${plural(rows.length, "1 pacco spedito", "# pacchi spediti")} ${month === today().slice(0, 7) ? "questo mese" : "a " + new Date(y, m - 1, 1).toLocaleDateString("it-IT", { month: "long" })}.`),
+      el("div", { class: "small" }, days === 1 ? "Tutti nello stesso giorno." : `In media ${(rows.length / days).toLocaleString("it-IT", { maximumFractionDigits: 1 })} al giorno, nei ${days} giorni in cui hai spedito.`)),
+    el("div", { class: "mstats" },
+      el("div", { class: "mstat" }, el("b", {}, String(colli)), el("span", {}, "Colli")),
+      el("div", { class: "mstat" }, el("b", { style: "color:var(--done)" }, Math.round(ok / rows.length * 100) + "%"), el("span", {}, "Arrivati")),
+      el("div", { class: "mstat" }, el("b", { style: ko ? "color:var(--warn)" : "" }, String(ko)), el("span", {}, "Con problemi"))),
+    el("h3", { class: "grp", style: "margin-top:24px" }, "Per corriere"),
+    ...cs.map(([c, n]) => el("div", { class: "cbar" }, el("span", {}, c), el("span", { class: "tr" }, el("i", { style: `width:${n / max * 100}%` })), el("span", { class: "n" }, String(n)))),
+    el("button", { class: "wide", onclick: () => exportCsv(rows, `pacchi-${month}.csv`) }, "⬇︎  Scarica il mese per Excel"));
+}
+
+/* ---------- detail ---------- */
+function openDetail(p){ detailId = p.id; drawDetail(p); $("#detScrim").hidden = false; buzz(); }
+function closeDetail(){ detailId = null; $("#detScrim").hidden = true; }
+function setStato(p, k){
+  if (p.stato === k) return;
+  p.stato = k; save(p); buzz(); render(); drawDetail(p);
+  const name = first(p);
+  toast(k === "consegnato" ? (name ? `Evviva, ${name} ha ricevuto il pacco! 🎉` : "Evviva, è arrivato! 🎉")
+    : k === "problema" ? "Segnato. Lo trovi in «Da seguire» finché non si risolve."
+    : k === "transito" ? "In viaggio 🚚" : `Fatto: ${ST[k].l.toLowerCase()}`);
+}
+function drawDetail(p){
+  const s = ST[p.stato] || ST.spedito;
+  const link = p.tracking && (CARRIERS[p.corriere] || CARRIERS.Altro)(p.tracking);
+  const info = [
+    ["Corriere", p.corriere || "—"],
+    ["Tracking", p.tracking || "Non inserito", p.tracking ? "mono" : null],
+    ["Spedito", relDay(p.data) === "oggi" || relDay(p.data) === "ieri" ? relDay(p.data) + ", " + fmt(p.data, { day: "numeric", month: "long" }) : fmt(p.data, { weekday: "long", day: "numeric", month: "long" })],
+    (Number(p.colli) || 1) > 1 ? ["Colli", String(p.colli)] : null,
+    p.note ? ["Nota", p.note] : null,
+  ].filter(Boolean);
+  $("#det").replaceChildren(
+    el("div", { class: "grab" }),
+    el("div", { class: "dhead" }, avatar(p), el("div", { style: "min-width:0" },
+      el("h3", { style: "overflow-wrap:anywhere" }, who(p)),
+      el("div", { class: "sub", style: "margin:0" }, [p.citta, s.em + " " + s.l].filter(Boolean).join(" · ")))),
+    el("dl", { class: "dinfo", style: "margin:14px 0 0" }, info.map(([k, v, c]) => el("div", {}, el("dt", {}, k), el("dd", { class: c }, v)))),
+    el("div", { class: "actrow" },
+      link ? el("a", { href: link, target: "_blank", rel: "noopener" }, "Traccia ↗") : el("button", { onclick: () => { closeDetail(); openForm(p); } }, "+ Tracking"),
+      p.tracking ? el("button", { onclick: () => copy(p.tracking) }, "Copia numero") : el("button", { onclick: () => { closeDetail(); openForm(p); } }, "Modifica")),
+    el("h3", { class: "grp" }, "A che punto è?"),
+    el("div", { class: "stlist" }, STATI.map(x => el("button", { class: "stbtn", "aria-pressed": String(x.k === p.stato), style: `--sc:${x.c};--ss:${x.s}`, onclick: () => setStato(p, x.k) },
+      el("span", { class: "em" }, x.em), el("span", {}, el("b", {}, x.l), el("small", {}, x.d)), x.k === p.stato ? el("span", { class: "ck" }, "✓") : null))),
+    el("div", { class: "sbtns" },
+      el("button", { onclick: () => { closeDetail(); openForm(p); } }, "Modifica i dati"),
+      el("button", { class: "linkbtn warn", onclick: () => {
+        if (!confirm(`Vuoi davvero eliminare il pacco per ${who(p)}?`)) return;
+        pacchi = pacchi.filter(x => x.id !== p.id); remove(p.id); closeDetail(); render(); toast("Pacco eliminato");
+      } }, "Elimina questo pacco"),
+      el("button", { class: "linkbtn", onclick: closeDetail }, "Chiudi")));
+}
+$("#detScrim").addEventListener("click", e => { if (e.target.id === "detScrim") closeDetail(); });
 
 /* ---------- form ---------- */
 const form = $("#form");
-$("#fStato").replaceChildren(...STATI.map(s => el("option", { value: s.k }, s.l)));
-let fCarrier = lastCarrier;
+let fCarrier = lastCarrier, colli = 1;
 function drawCarriers(){
   $("#fCar").replaceChildren(...Object.keys(CARRIERS).map(c =>
-    el("button", { type: "button", "aria-pressed": String(c === fCarrier), onclick: () => { fCarrier = c; drawCarriers(); } }, c)));
+    el("button", { type: "button", "aria-pressed": String(c === fCarrier), onclick: () => { fCarrier = c; buzz(); drawCarriers(); } }, c)));
 }
+const setColli = n => { colli = Math.max(1, Math.min(99, n)); $("#cOut").textContent = colli; };
+$("#cMinus").onclick = () => setColli(colli - 1);
+$("#cPlus").onclick = () => setColli(colli + 1);
 function openForm(p){
   editing = p || null;
   form.reset();
-  $("#fTitle").textContent = p ? "Modifica pacco" : "Nuovo pacco";
-  $("#fDel").hidden = !p;
+  $("#fTitle").textContent = p ? "Modifica pacco" : "Nuovo pacco 📦";
+  $("#fLead").textContent = p ? "Correggi quello che serve." : "Bastano due cose: a chi va e il tracking. Il resto è facoltativo.";
   $("#fMore").hidden = !!p;
+  $("#fSave").textContent = p ? "Salva le modifiche" : "Salva pacco";
   fCarrier = p?.corriere || lastCarrier;
-  form.tracking.value = p?.tracking || "";
   form.destinatario.value = p?.destinatario || "";
   form.citta.value = p?.citta || "";
-  form.data.value = p?.data || day;
-  form.colli.value = p?.colli || 1;
-  form.stato.value = p?.stato || "spedito";
+  form.tracking.value = p?.tracking || "";
+  form.data.value = p?.data || (view === "giorno" ? day : today());
   form.note.value = p?.note || "";
+  setColli(Number(p?.colli) || 1);
   drawCarriers();
-  $("#scrim").hidden = false;
-  setTimeout(() => $("#fTrk").focus(), 50);
+  $("#formScrim").hidden = false;
+  buzz();
 }
-function closeForm(){ $("#scrim").hidden = true; editing = null; }
+function closeForm(){ $("#formScrim").hidden = true; editing = null; document.activeElement?.blur(); }
 function commit(){
   const v = {
-    tracking: form.tracking.value.trim().replace(/\s+/g, ""),
-    corriere: fCarrier,
     destinatario: form.destinatario.value.trim(),
     citta: form.citta.value.trim(),
-    data: form.data.value || day,
-    colli: Math.max(1, parseInt(form.colli.value, 10) || 1),
-    stato: form.stato.value,
+    corriere: fCarrier,
+    tracking: form.tracking.value.trim().replace(/\s+/g, "").toUpperCase(),
+    data: form.data.value || today(),
+    colli,
     note: form.note.value.trim(),
   };
-  if (!v.tracking && !v.destinatario) { toast("Inserisci almeno il tracking o il destinatario."); return false; }
-  if (v.tracking && pacchi.some(p => p !== editing && p.tracking === v.tracking)) toast("Attenzione: tracking già registrato.");
+  if (!v.tracking && !v.destinatario) { toast("Scrivi almeno a chi va o il numero di tracking 🙂"); form.destinatario.focus(); return false; }
+  const dup = v.tracking && pacchi.find(p => p !== editing && p.tracking === v.tracking);
   lastCarrier = fCarrier; ls.set("pacchi.carrier", lastCarrier);
   let p = editing;
   if (p) Object.assign(p, v);
-  else { p = { id: uid(), created: Date.now(), ...v }; pacchi.push(p); }
-  save(p);
-  if (v.data !== day && !editing) toast("Salvato il " + nice(v.data, { day: "numeric", month: "long" }));
+  else { p = { id: uid(), created: Date.now(), stato: "spedito", ...v }; pacchi.push(p); }
+  save(p); buzz();
+  if (!editing) day = v.data;
   render();
+  toast(dup ? "Salvato, ma occhio: questo tracking c'era già 👀"
+    : editing ? "Modifiche salvate 👍"
+    : v.destinatario ? `Fatto! Il pacco per ${first(p)} è registrato.` : "Fatto! Pacco registrato.");
   return true;
 }
 form.addEventListener("submit", e => { e.preventDefault(); if (commit()) closeForm(); });
 $("#fMore").onclick = () => {
   if (!commit()) return;
-  const keep = { data: form.data.value, stato: form.stato.value };
-  form.reset(); form.data.value = keep.data; form.stato.value = keep.stato; form.colli.value = 1;
-  toast("Salvato. Avanti il prossimo!");
-  $("#fTrk").focus();
+  const keepDate = form.data.value;
+  form.reset(); form.data.value = keepDate; setColli(1);
+  $("#form").scrollTop = 0;
+  form.destinatario.focus();
 };
 $("#fCancel").onclick = closeForm;
-$("#scrim").addEventListener("click", e => { if (e.target.id === "scrim") closeForm(); });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#scrim").hidden) closeForm(); });
-$("#fDel").onclick = () => {
-  if (!editing || !confirm("Eliminare questo pacco?")) return;
-  const id = editing.id;
-  pacchi = pacchi.filter(p => p.id !== id);
-  remove(id); closeForm(); render(); toast("Pacco eliminato");
+$("#formScrim").addEventListener("click", e => { if (e.target.id === "formScrim") closeForm(); });
+$("#fPaste").onclick = async () => {
+  try { const t = (await navigator.clipboard.readText()).trim(); if (t) { form.tracking.value = t.replace(/\s+/g, ""); buzz(); } else toast("Gli appunti sono vuoti"); }
+  catch { form.tracking.focus(); toast("Tieni premuto nel campo e scegli «Incolla»"); }
 };
+form.tracking.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); form.tracking.blur(); } });
 
 /* ---------- controls ---------- */
-const go = d => { day = d; showOld = false; render(); };
-$("#prev").onclick = () => go(shift(day, -1));
-$("#next").onclick = () => go(shift(day, 1));
-$("#todayBtn").onclick = () => go(today());
-$("#dayIn").addEventListener("change", e => e.target.value && go(e.target.value));
-$("#fab").onclick = () => openForm();
-$("#remind").onclick = () => { showOld = !showOld; render(); };
-$("#q").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); render(); });
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+  view = t.dataset.v; buzz(); render(); window.scrollTo({ top: 0 });
+  if (view === "cerca") setTimeout(() => $("#q").focus(), 60);
+});
+$("#plus").onclick = () => openForm();
+$("#wPrev").onclick = () => { day = shift(day, -7); render(); };
+$("#wNext").onclick = () => { day = shift(day, 7); render(); };
+const shiftMonth = n => { const [y, m] = month.split("-").map(Number); const d = new Date(y, m - 1 + n, 1); month = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; render(); };
+$("#mPrev").onclick = () => shiftMonth(-1);
+$("#mNext").onclick = () => shiftMonth(1);
+$("#nudge").onclick = () => { view = "seguire"; render(); window.scrollTo({ top: 0 }); };
+$("#q").addEventListener("input", e => { query = e.target.value.trim(); renderFind(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#formScrim").hidden) closeForm(); else if (!$("#detScrim").hidden) closeDetail(); } });
+
+// swipe left/right on the week to change week
+let sx = null;
+$("#week").addEventListener("touchstart", e => sx = e.touches[0].clientX, { passive: true });
+$("#week").addEventListener("touchend", e => {
+  if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null;
+  if (Math.abs(dx) > 50) { day = shift(day, dx < 0 ? 7 : -7); buzz(); render(); }
+});
 
 let tt;
 function toast(msg){
   const t = $("#toast"); t.textContent = msg; t.hidden = false;
-  clearTimeout(tt); tt = setTimeout(() => t.hidden = true, 2200);
+  clearTimeout(tt); tt = setTimeout(() => t.hidden = true, 2600);
 }
 async function copy(txt){
-  try { await navigator.clipboard.writeText(txt); toast("Tracking copiato"); } catch { toast(txt); }
+  try { await navigator.clipboard.writeText(txt); buzz(); toast("Numero copiato 📋"); } catch { toast(txt); }
 }
-
-$("#csv").onclick = async () => {
-  const rows = pacchi.filter(p => p.data === day).sort(byNew);
-  if (!rows.length) { toast("Nessun pacco da esportare in questo giorno."); return; }
+async function exportCsv(rows, filename){
   const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-  const head = ["Data", "Corriere", "Tracking", "Destinatario", "Città", "Colli", "Stato", "Note"];
-  const csv = "﻿" + [head, ...rows.map(p => [p.data, p.corriere, p.tracking, p.destinatario, p.citta, p.colli, ST[p.stato]?.l, p.note])]
+  const head = ["Data", "Destinatario", "Città", "Corriere", "Tracking", "Colli", "Stato", "Note"];
+  const csv = "﻿" + [head, ...rows.slice().sort((a, b) => a.data < b.data ? -1 : a.data > b.data ? 1 : byNew(b, a))
+    .map(p => [p.data, p.destinatario, p.citta, p.corriere, p.tracking, p.colli, ST[p.stato]?.l, p.note])]
     .map(r => r.map(q).join(";")).join("\r\n");
-  const filename = `pacchi-${day}.csv`;
   const dl = await window.claude?.use?.("downloads").catch(() => null);
   if (dl) {
-    try { await dl.save({ filename, data: csv }); } catch (e) { if (e?.code !== "declined") toast("Download non riuscito."); }
+    try { await dl.save({ filename, data: csv }); } catch (e) { if (e?.code !== "declined") toast("Il download non è riuscito."); }
     return;
   }
   const a = el("a", { href: URL.createObjectURL(new Blob([csv], { type: "text/csv" })), download: filename });
   document.body.append(a); a.click(); a.remove();
-};
+}
 
 boot();
 </script>
