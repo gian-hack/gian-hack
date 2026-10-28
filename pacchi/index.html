@@ -1,0 +1,457 @@
+<title>Pacchi del giorno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F8F9FC; --surface:#FFFFFF; --surface-2:#F2F4F8; --ink:#1B2033; --muted:#6E7590; --line:#E3E6EE;
+  --accent:#F2622E; --accent-ink:#FFFFFF; --accent-soft:#FFEDE5;
+  --done:#1D946A; --done-soft:#DDF2EA; --warn:#C8401A; --warn-soft:#FDE5DC;
+  --shadow:0 1px 2px rgba(22,26,43,.06),0 8px 24px rgba(22,26,43,.06);
+  --display:"Bricolage Grotesque",ui-rounded,system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:18px 120px}
+
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:800;font-size:34px;line-height:1;margin:4px 0 0;letter-spacing:-.02em}
+.sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.sync i{width:7px;height:7px;border-radius:50%;background:var(--done);display:inline-block}
+.sync.local i{background:var(--accent)}
+
+/* day nav */
+.daynav{margin-top:18px;display:flex;align-items:center;gap:8px}
+.daynav .nb{height:42px;min-width:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:18px}
+.daypick{flex:1;min-width:0;position:relative;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600}
+.daypick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.daypick .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.daypick .lbl::first-letter{text-transform:uppercase}
+.todaybtn{height:42px;border-radius:12px;border:0;background:var(--ink);color:var(--bg);font-weight:600;padding:0 14px}
+.todaybtn[hidden]{display:none}
+
+/* stats */
+.stats{margin-top:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 10px 9px;min-width:0}
+.stat b{display:block;font-family:var(--display);font-weight:800;font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:4px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat.ok b{color:var(--done)} .stat.ko b{color:var(--warn)}
+.bar{height:6px;background:var(--line);border-radius:6px;margin-top:10px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%;transition:width .4s cubic-bezier(.2,.8,.2,1)}
+
+/* reminder */
+.remind{margin-top:12px;width:100%;text-align:left;border:1px solid #F6C9B6;background:var(--accent-soft);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:10px;font-weight:600;color:#8A3413}
+.remind[hidden]{display:none}
+.remind .n{font-family:var(--display);font-weight:800;font-size:20px}
+.remind .go{margin-left:auto;font-size:14px;white-space:nowrap}
+
+/* tools */
+.tools{margin-top:16px;display:flex;gap:8px}
+.search{flex:1;min-width:0;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:0 14px}
+.iconbtn{flex:none;height:44px;min-width:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-weight:600;font-size:14px;padding:0 12px}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 0;padding:2px 16px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 13px;font-weight:600;font-size:14px}
+.chip .n{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.7}
+.sdot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+
+.sect{margin:20px 0 8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+
+/* cards */
+.list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);border-left:5px solid var(--sc,var(--line))}
+.row1{display:flex;align-items:center;gap:8px;min-width:0}
+.carrier{flex:none;font-size:12px;font-weight:600;background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:2px 7px}
+.trk{font-family:var(--mono);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;border:0;background:none;padding:0;text-align:left}
+.trk.none{color:var(--muted);font-family:var(--body);font-style:italic}
+.pill{margin-left:auto;flex:none;appearance:none;-webkit-appearance:none;border:0;border-radius:999px;padding:6px 26px 6px 11px;font-size:13px;font-weight:600;background:var(--ss) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%231B2033' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;color:var(--sc)}
+.who{margin-top:7px;font-weight:600;overflow-wrap:anywhere}
+.who span{font-weight:400;color:var(--muted)}
+.note{margin-top:3px;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.row3{margin-top:9px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-right:auto}
+.act{height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600;padding:0 10px;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center}
+.act.trkl{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.empty{text-align:center;color:var(--muted);padding:36px 12px;border:1.5px dashed var(--line);border-radius:16px}
+.empty b{display:block;color:var(--ink);font-family:var(--display);font-size:20px;margin-bottom:4px}
+
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom));height:54px;border-radius:16px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:17px;padding:0 24px;box-shadow:0 8px 24px rgba(242,98,46,.35);display:flex;align-items:center;gap:8px;z-index:5}
+.fab span{font-size:24px;line-height:1;margin-top:-2px}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(20,24,40,.38);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+.scrim[hidden]{display:none}
+.sheet{background:var(--surface);width:100%;max-width:640px;border-radius:22px 22px 0 0;padding:18px 16px max(18px,env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+.sheet h3{font-family:var(--display);font-weight:800;font-size:24px;margin:0 0 12px;letter-spacing:-.01em}
+.f{display:block;margin-top:10px}
+.f>span{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.f input,.f textarea,.f select{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:11px 12px;font-size:16px}
+.f textarea{resize:vertical;min-height:60px}
+.f input.mono{font-family:var(--mono)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cgrid{display:flex;flex-wrap:wrap;gap:6px}
+.cgrid button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 11px;font-weight:600;font-size:14px}
+.cgrid button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sbtns{margin-top:16px;display:flex;gap:8px}
+.sbtns button{flex:1;height:48px;border-radius:13px;font-weight:600;border:1px solid var(--line);background:var(--surface)}
+.sbtns .pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.del{margin-top:10px;width:100%;height:42px;border:0;background:none;color:var(--warn);font-weight:600}
+.del[hidden]{display:none}
+
+.toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.toast[hidden]{display:none}
+
+@media (max-width:420px){
+  .stat b{font-size:22px}
+  h1{font-size:30px}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="kicker" id="kicker">Spedizioni</div>
+      <h1>Pacchi</h1>
+    </div>
+    <div class="sync" id="sync"><i></i><span>Collegamento…</span></div>
+  </header>
+
+  <div class="daynav">
+    <button class="nb" id="prev" aria-label="Giorno precedente">‹</button>
+    <label class="daypick"><span class="lbl" id="dayLbl"></span><input type="date" id="dayIn" aria-label="Scegli giorno"></label>
+    <button class="nb" id="next" aria-label="Giorno successivo">›</button>
+    <button class="todaybtn" id="todayBtn" hidden>Oggi</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div class="bar" id="bar"></div>
+
+  <button class="remind" id="remind" hidden></button>
+
+  <div class="tools">
+    <input class="search" id="q" type="search" placeholder="Cerca tracking, nome, città…" autocomplete="off">
+    <button class="iconbtn" id="csv" title="Esporta il giorno in CSV">CSV</button>
+  </div>
+  <div class="chips" id="chips"></div>
+
+  <div class="sect"><span id="sectT"></span><span id="sectN"></span></div>
+  <div class="list" id="list"></div>
+</div>
+
+<button class="fab" id="fab"><span>+</span> Nuovo pacco</button>
+
+<div class="scrim" id="scrim" hidden>
+  <form class="sheet" id="form" autocomplete="off">
+    <h3 id="fTitle">Nuovo pacco</h3>
+    <label class="f"><span>Numero di tracking</span><input class="mono" name="tracking" id="fTrk" placeholder="Es. 1Z999AA10123456784" autocapitalize="characters" spellcheck="false"></label>
+    <div class="f"><span>Corriere</span><div class="cgrid" id="fCar"></div></div>
+    <div class="two">
+      <label class="f"><span>Destinatario</span><input name="destinatario" placeholder="Nome o azienda"></label>
+      <label class="f"><span>Città</span><input name="citta" placeholder="Es. Milano"></label>
+    </div>
+    <div class="two">
+      <label class="f"><span>Data spedizione</span><input type="date" name="data" required></label>
+      <label class="f"><span>Colli</span><input type="number" name="colli" min="1" step="1" value="1" inputmode="numeric"></label>
+    </div>
+    <label class="f"><span>Stato</span><select name="stato" id="fStato"></select></label>
+    <label class="f"><span>Note</span><textarea name="note" placeholder="Ordine, contenuto, riferimenti…"></textarea></label>
+    <div class="sbtns">
+      <button type="button" id="fCancel">Annulla</button>
+      <button type="button" id="fMore">Salva e un altro</button>
+      <button type="submit" class="pri">Salva</button>
+    </div>
+    <button type="button" class="del" id="fDel" hidden>Elimina pacco</button>
+  </form>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const $ = s => document.querySelector(s);
+function el(tag, attrs = {}, ...kids){
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (k === "style") n.style.cssText = v;
+    else n.setAttribute(k, v === true ? "" : v);
+  }
+  n.append(...kids.flat().filter(k => k != null && k !== false));
+  return n;
+}
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const today = () => ymd(new Date());
+const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const shift = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
+const nice = (s, opt = { weekday: "long", day: "numeric", month: "long" }) => parse(s).toLocaleDateString("it-IT", opt);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+const STATI = [
+  { k: "preparato",  l: "Preparato",   c: "#5A6178", s: "#EEF0F5" },
+  { k: "spedito",    l: "Spedito",     c: "#2F6FE4", s: "#E4EDFD" },
+  { k: "transito",   l: "In transito", c: "#A97A00", s: "#FBF1D6" },
+  { k: "consegnato", l: "Consegnato",  c: "#1D946A", s: "#DDF2EA" },
+  { k: "problema",   l: "Problema",    c: "#C8401A", s: "#FDE5DC" },
+];
+const ST = Object.fromEntries(STATI.map(s => [s.k, s]));
+const OPEN = new Set(["preparato", "spedito", "transito", "problema"]);
+
+const enc = encodeURIComponent;
+const CARRIERS = {
+  "BRT":    t => "https://parcelsapp.com/it/tracking/" + enc(t),
+  "GLS":    t => "https://gls-group.com/IT/it/servizi-online/ricerca-spedizioni?match=" + enc(t),
+  "SDA":    t => "https://www.sda.it/wps/portal/Servizi_online/dettaglio-spedizione?locale=it&tracing.letteraVettura=" + enc(t),
+  "Poste":  t => "https://www.poste.it/cerca/index.html#/risultati-spedizioni/" + enc(t),
+  "DHL":    t => "https://www.dhl.com/it-it/home/tracking.html?tracking-id=" + enc(t),
+  "UPS":    t => "https://www.ups.com/track?loc=it_IT&tracknum=" + enc(t),
+  "FedEx":  t => "https://www.fedex.com/fedextrack/?trknbr=" + enc(t),
+  "InPost": t => "https://parcelsapp.com/it/tracking/" + enc(t),
+  "Altro":  t => "https://parcelsapp.com/it/tracking/" + enc(t),
+};
+
+const ls = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+let db = null, mode = "loading", pacchi = [];
+let day = today(), filter = "tutti", query = "", showOld = false, editing = null;
+let lastCarrier = ls.get("pacchi.carrier") || "BRT";
+const chains = {};
+
+$("#kicker").textContent = nice(today(), { weekday: "long", day: "numeric", month: "long" });
+
+/* ---------- persistence ---------- */
+function setSync(kind){
+  const s = $("#sync");
+  s.classList.toggle("local", kind === "local");
+  s.querySelector("span").textContent = kind === "cloud" ? "Sincronizzato" : kind === "local" ? "Solo su questo dispositivo" : "Collegamento…";
+}
+function save(p){
+  p.updated = Date.now();
+  if (mode !== "cloud") { ls.set("pacchi.local", pacchi); return; }
+  const { id, ...body } = JSON.parse(JSON.stringify(p));
+  chains[id] = (chains[id] || Promise.resolve())
+    .then(() => db.doc("pacchi/" + id).set(body))
+    .catch(e => toast(e?.code === "quota_exceeded" ? "Spazio pieno: esporta ed elimina i pacchi vecchi." : "Modifica non salvata, riprova."));
+}
+function remove(id){
+  if (mode !== "cloud") { ls.set("pacchi.local", pacchi); return; }
+  (chains[id] || Promise.resolve()).then(() => db.doc("pacchi/" + id).delete()).catch(() => toast("Non riesco a eliminare il pacco."));
+}
+function startLocal(){
+  mode = "local"; setSync("local");
+  pacchi = ls.get("pacchi.local") || [];
+  render();
+}
+async function boot(){
+  render();
+  if (!window.claude?.use) return startLocal();
+  db = await window.claude.use("db").catch(() => null);
+  if (!db) return startLocal();
+  mode = "cloud"; setSync("cloud");
+  db.collection("pacchi").onSnapshot(snap => {
+    pacchi = snap.docs.map(d => ({ stato: "spedito", colli: 1, ...JSON.parse(JSON.stringify(d.data())), id: d.id }))
+      .filter(p => typeof p.data === "string");
+    render();
+  }, () => { setSync("local"); toast("Connessione persa. Ricarica la pagina."); });
+}
+
+/* ---------- render ---------- */
+const byNew = (a, b) => (b.created || 0) - (a.created || 0);
+function matches(p, q){
+  return [p.tracking, p.destinatario, p.citta, p.note, p.corriere].some(v => (v || "").toLowerCase().includes(q));
+}
+function render(){
+  const isToday = day === today();
+  $("#dayLbl").textContent = isToday ? "Oggi · " + nice(day, { day: "numeric", month: "long" }) : nice(day);
+  $("#dayIn").value = day;
+  $("#todayBtn").hidden = isToday;
+
+  const ofDay = pacchi.filter(p => p.data === day);
+  const cnt = k => ofDay.filter(p => p.stato === k).length;
+  const tot = ofDay.length, ok = cnt("consegnato"), ko = cnt("problema"), moving = tot - ok - ko;
+  const colli = ofDay.reduce((s, p) => s + (Number(p.colli) || 1), 0);
+  $("#stats").replaceChildren(
+    el("div", { class: "stat" }, el("b", {}, String(tot)), el("span", {}, colli !== tot ? colli + " colli" : "Spediti")),
+    el("div", { class: "stat" }, el("b", {}, String(moving)), el("span", {}, "In viaggio")),
+    el("div", { class: "stat ok" }, el("b", {}, String(ok)), el("span", {}, "Arrivati")),
+    el("div", { class: "stat ko" }, el("b", {}, String(ko)), el("span", {}, "Problemi")),
+  );
+  $("#bar").replaceChildren(...(tot ? STATI.map(s => el("i", { style: `width:${cnt(s.k) / tot * 100}%;background:${s.c}` })) : []));
+
+  // older parcels still open
+  const old = pacchi.filter(p => p.data < day && OPEN.has(p.stato) && p.data >= shift(day, -60));
+  const r = $("#remind");
+  r.hidden = !old.length || !!query;
+  r.replaceChildren(el("span", { class: "n" }, String(old.length)),
+    el("span", {}, old.length === 1 ? "pacco dei giorni scorsi non ancora consegnato" : "pacchi dei giorni scorsi non ancora consegnati"),
+    el("span", { class: "go" }, showOld ? "Nascondi" : "Mostra"));
+
+  // chips
+  const base = query ? pacchi.filter(p => matches(p, query)) : ofDay;
+  const chipCount = k => k === "tutti" ? base.length : base.filter(p => p.stato === k).length;
+  $("#chips").replaceChildren(...[{ k: "tutti", l: "Tutti" }, ...STATI].map(s =>
+    el("button", { class: "chip", "aria-pressed": String(filter === s.k), onclick: () => { filter = s.k; render(); } },
+      s.c ? el("i", { class: "sdot", style: "background:" + s.c }) : null, s.l, el("span", { class: "n" }, String(chipCount(s.k))))));
+
+  // list
+  const shown = base.filter(p => filter === "tutti" || p.stato === filter)
+    .sort(query ? (a, b) => (a.data < b.data ? 1 : a.data > b.data ? -1 : byNew(a, b)) : byNew);
+  const nPacchi = n => n ? n + (n === 1 ? " pacco" : " pacchi") : "";
+  const title = query ? "Risultati in tutti i giorni" : isToday ? "Spediti oggi" : "Spediti il " + nice(day, { day: "numeric", month: "long" });
+  const withOld = showOld && old.length && !query;
+  $("#sectT").textContent = withOld ? "Da seguire" : title;
+  $("#sectN").textContent = nPacchi(withOld ? old.length : shown.length);
+
+  const list = $("#list");
+  const nodes = [];
+  if (withOld) {
+    old.sort((a, b) => a.data < b.data ? -1 : 1).forEach(p => nodes.push(card(p, true)));
+    nodes.push(el("div", { class: "sect" }, el("span", {}, title), el("span", {}, nPacchi(shown.length))));
+  }
+  if (!shown.length) {
+    nodes.push(el("div", { class: "empty" },
+      el("b", {}, query ? "Nessun risultato" : mode === "loading" ? "Caricamento…" : "Nessun pacco"),
+      query ? "Prova con un altro numero o nome." : filter !== "tutti" ? "Nessun pacco con questo stato." : "Tocca «Nuovo pacco» per registrare una spedizione."));
+  } else shown.forEach(p => nodes.push(card(p, !!query)));
+  list.replaceChildren(...nodes);
+}
+
+function card(p, withDate){
+  const s = ST[p.stato] || ST.spedito;
+  const sel = el("select", { class: "pill", "aria-label": "Stato", onchange: e => { p.stato = e.target.value; save(p); render(); toast(ST[p.stato].l); } },
+    STATI.map(x => el("option", { value: x.k, selected: x.k === p.stato }, x.l)));
+  const trk = p.tracking
+    ? el("button", { class: "trk", title: "Copia", onclick: () => copy(p.tracking) }, p.tracking)
+    : el("span", { class: "trk none" }, "senza tracking");
+  const meta = [withDate ? nice(p.data, { day: "numeric", month: "short" }) : null,
+    (Number(p.colli) || 1) > 1 ? p.colli + " colli" : null].filter(Boolean).join(" · ");
+  const link = p.tracking && (CARRIERS[p.corriere] || CARRIERS.Altro)(p.tracking);
+  return el("article", { class: "card", style: `--sc:${s.c};--ss:${s.s}` },
+    el("div", { class: "row1" }, el("span", { class: "carrier" }, p.corriere || "—"), trk, sel),
+    p.destinatario || p.citta ? el("div", { class: "who" }, p.destinatario || "", p.citta ? el("span", {}, (p.destinatario ? " · " : "") + p.citta) : null) : null,
+    p.note ? el("div", { class: "note" }, p.note) : null,
+    el("div", { class: "row3" },
+      el("span", { class: "meta" }, meta),
+      p.stato !== "consegnato" ? el("button", { class: "act", onclick: () => { p.stato = "consegnato"; save(p); render(); toast("Segnato come consegnato"); } }, "✓ Consegnato") : null,
+      el("button", { class: "act", onclick: () => openForm(p) }, "Modifica"),
+      link ? el("a", { class: "act trkl", href: link, target: "_blank", rel: "noopener" }, "Traccia ↗") : null));
+}
+
+/* ---------- form ---------- */
+const form = $("#form");
+$("#fStato").replaceChildren(...STATI.map(s => el("option", { value: s.k }, s.l)));
+let fCarrier = lastCarrier;
+function drawCarriers(){
+  $("#fCar").replaceChildren(...Object.keys(CARRIERS).map(c =>
+    el("button", { type: "button", "aria-pressed": String(c === fCarrier), onclick: () => { fCarrier = c; drawCarriers(); } }, c)));
+}
+function openForm(p){
+  editing = p || null;
+  form.reset();
+  $("#fTitle").textContent = p ? "Modifica pacco" : "Nuovo pacco";
+  $("#fDel").hidden = !p;
+  $("#fMore").hidden = !!p;
+  fCarrier = p?.corriere || lastCarrier;
+  form.tracking.value = p?.tracking || "";
+  form.destinatario.value = p?.destinatario || "";
+  form.citta.value = p?.citta || "";
+  form.data.value = p?.data || day;
+  form.colli.value = p?.colli || 1;
+  form.stato.value = p?.stato || "spedito";
+  form.note.value = p?.note || "";
+  drawCarriers();
+  $("#scrim").hidden = false;
+  setTimeout(() => $("#fTrk").focus(), 50);
+}
+function closeForm(){ $("#scrim").hidden = true; editing = null; }
+function commit(){
+  const v = {
+    tracking: form.tracking.value.trim().replace(/\s+/g, ""),
+    corriere: fCarrier,
+    destinatario: form.destinatario.value.trim(),
+    citta: form.citta.value.trim(),
+    data: form.data.value || day,
+    colli: Math.max(1, parseInt(form.colli.value, 10) || 1),
+    stato: form.stato.value,
+    note: form.note.value.trim(),
+  };
+  if (!v.tracking && !v.destinatario) { toast("Inserisci almeno il tracking o il destinatario."); return false; }
+  if (v.tracking && pacchi.some(p => p !== editing && p.tracking === v.tracking)) toast("Attenzione: tracking già registrato.");
+  lastCarrier = fCarrier; ls.set("pacchi.carrier", lastCarrier);
+  let p = editing;
+  if (p) Object.assign(p, v);
+  else { p = { id: uid(), created: Date.now(), ...v }; pacchi.push(p); }
+  save(p);
+  if (v.data !== day && !editing) toast("Salvato il " + nice(v.data, { day: "numeric", month: "long" }));
+  render();
+  return true;
+}
+form.addEventListener("submit", e => { e.preventDefault(); if (commit()) closeForm(); });
+$("#fMore").onclick = () => {
+  if (!commit()) return;
+  const keep = { data: form.data.value, stato: form.stato.value };
+  form.reset(); form.data.value = keep.data; form.stato.value = keep.stato; form.colli.value = 1;
+  toast("Salvato. Avanti il prossimo!");
+  $("#fTrk").focus();
+};
+$("#fCancel").onclick = closeForm;
+$("#scrim").addEventListener("click", e => { if (e.target.id === "scrim") closeForm(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#scrim").hidden) closeForm(); });
+$("#fDel").onclick = () => {
+  if (!editing || !confirm("Eliminare questo pacco?")) return;
+  const id = editing.id;
+  pacchi = pacchi.filter(p => p.id !== id);
+  remove(id); closeForm(); render(); toast("Pacco eliminato");
+};
+
+/* ---------- controls ---------- */
+const go = d => { day = d; showOld = false; render(); };
+$("#prev").onclick = () => go(shift(day, -1));
+$("#next").onclick = () => go(shift(day, 1));
+$("#todayBtn").onclick = () => go(today());
+$("#dayIn").addEventListener("change", e => e.target.value && go(e.target.value));
+$("#fab").onclick = () => openForm();
+$("#remind").onclick = () => { showOld = !showOld; render(); };
+$("#q").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); render(); });
+
+let tt;
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(tt); tt = setTimeout(() => t.hidden = true, 2200);
+}
+async function copy(txt){
+  try { await navigator.clipboard.writeText(txt); toast("Tracking copiato"); } catch { toast(txt); }
+}
+
+$("#csv").onclick = async () => {
+  const rows = pacchi.filter(p => p.data === day).sort(byNew);
+  if (!rows.length) { toast("Nessun pacco da esportare in questo giorno."); return; }
+  const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+  const head = ["Data", "Corriere", "Tracking", "Destinatario", "Città", "Colli", "Stato", "Note"];
+  const csv = "﻿" + [head, ...rows.map(p => [p.data, p.corriere, p.tracking, p.destinatario, p.citta, p.colli, ST[p.stato]?.l, p.note])]
+    .map(r => r.map(q).join(";")).join("\r\n");
+  const filename = `pacchi-${day}.csv`;
+  const dl = await window.claude?.use?.("downloads").catch(() => null);
+  if (dl) {
+    try { await dl.save({ filename, data: csv }); } catch (e) { if (e?.code !== "declined") toast("Download non riuscito."); }
+    return;
+  }
+  const a = el("a", { href: URL.createObjectURL(new Blob([csv], { type: "text/csv" })), download: filename });
+  document.body.append(a); a.click(); a.remove();
+};
+
+boot();
+</script>
