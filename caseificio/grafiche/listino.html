@@ -74,7 +74,7 @@
     document.getElementById("colonne").innerHTML = d.colonne.map(col =>
       `<div class="colonna">${col.map(s => `<section><h2>${esc(s.nome)}</h2>${voci(s.voci)}</section>`).join("")}</div>`).join("");
     const r = d.riquadro;
-    document.getElementById("riquadro").innerHTML = r ? `<div class="testa"><div><div class="occhiello">${esc(r.occhiello)}</div><h2>${esc(r.nome)}</h2></div><div class="unita">Prezzi ${esc(r.unita)}</div></div>${voci(r.voci)}` : "";
+    document.getElementById("riquadro").innerHTML = r ? `<div class="testa"><div>${r.occhiello ? `<div class="occhiello">${esc(r.occhiello)}</div>` : ""}<h2>${esc(r.nome)}</h2></div><div class="unita">Prezzi ${esc(r.unita)}</div></div>${voci(r.voci)}` : "";
     document.fonts.ready.then(() => document.body.dataset.pronto = "1");
   });
 </script>
