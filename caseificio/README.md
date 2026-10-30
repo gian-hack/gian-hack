@@ -17,3 +17,8 @@ node caseificio/render.js grafiche/offerta.html grafiche/offerta-marmellata.json
 ```
 
 Escono post 1080×1080, storia 1080×1920 e locandina A4 (PNG a 300 dpi + PDF).
+Per un solo formato aggiungi in fondo per esempio `a4`:
+
+```
+node caseificio/render.js grafiche/listino.html grafiche/listino-pasta-sofia.json a4
+```

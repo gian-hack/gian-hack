@@ -1,0 +1,57 @@
+{
+  "occhiello": "Listino prezzi",
+  "titolo": "La Pasta di Sofia",
+  "sottotitolo": "Pasta fresca, ravioli e gnocchi · prezzi al chilo",
+  "unita": "al kg",
+  "colonne": [
+    [
+      { "nome": "Ravioli", "voci": [
+        ["Caprese", "13,00"],
+        ["Medaglioni carne e mozzarella", "16,50"],
+        ["Prosciutto e mozzarella", "14,50"],
+        ["Provola affumicata", "17,50"],
+        ["Provola affumicata e melanzane", "15,50"],
+        ["Provola affumicata e rucola", "15,50"],
+        ["Ricotta e limone", "13,00"],
+        ["Ricotta e spinaci", "13,00"],
+        ["Salsiccia e provola", "17,50"],
+        ["Zucca e porcini", "19,00"],
+        ["Zucca e Provolone del Monaco", "19,00"],
+        ["Baccalà e patate", "26,00"],
+        ["Gamberi, ricotta e limone", "27,00"],
+        ["Parmigiana di melanzane", "22,00"],
+        ["Pesce spada e melanzane", "26,50"],
+        ["Provolone del Monaco DOP e patate", "26,00"]
+      ]}
+    ],
+    [
+      { "nome": "Gnocchi", "voci": [
+        ["Classici", "5,20"]
+      ]},
+      { "nome": "Pasta fresca", "voci": [
+        ["Scialatielli", "7,00"],
+        ["Tagliatelle", "7,00"],
+        ["Sfoglia", "7,00"]
+      ]},
+      { "nome": "Tortellini", "voci": [
+        ["Al prosciutto", "15,00"],
+        ["Di carne", "19,50"]
+      ]}
+    ]
+  ],
+  "riquadro": {
+    "occhiello": "Anche al banco",
+    "nome": "Latte & yogurt",
+    "unita": "al pezzo",
+    "voci": [
+      ["Accaddì ½ l", "1,50"],
+      ["Accaddì 1 l", "2,50"],
+      ["Berna ½ l", "1,10"],
+      ["Berna 1 l", "2,00"],
+      ["Granarolo 1 l", "2,10"],
+      ["Latte vegetale", "2,50"],
+      ["Yogurt", "1,20"],
+      ["Zymil", "2,40"]
+    ]
+  }
+}

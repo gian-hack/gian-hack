@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Listino · Caseificio Perrusio</title>
+<style>
+  @font-face { font-family: "Karla"; src: url("../fonts/Karla.woff2") format("woff2"); font-weight: 200 800; }
+  @font-face { font-family: "Gelasio"; src: url("../fonts/Gelasio-Regular.woff2") format("woff2"); }
+
+  :root {
+    --salvia: #5C6E4F; --verde-scuro: #3F4A36; --castagna: #6A3F1A; --ocra: #DA8932;
+    --crema: #F8F0E3; --foglia: #E3E8DD; --beige: #EADFCF;
+    --serif: Georgia, "Gelasio", serif; --sans: "Karla", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--crema); }
+  body { font-family: var(--sans); color: var(--verde-scuro); -webkit-font-smoothing: antialiased; }
+
+  /* A4 a 300 dpi: 2480 × 3508, 1 u = 10 px */
+  .tela { width: 2480px; height: 3508px; --u: 10px; background: var(--crema); display: flex; flex-direction: column; }
+  .corpo { flex: 1; padding: 160px 190px 0; display: flex; flex-direction: column; }
+
+  .occhiello { font-weight: 700; text-transform: uppercase; letter-spacing: .22em; color: var(--ocra); font-size: 50px; }
+  header { text-align: center; padding-bottom: 70px; border-bottom: 5px solid var(--beige); }
+  header h1 { font-family: var(--serif); font-weight: 400; color: var(--castagna); font-size: 200px; line-height: 1.05; margin: 22px 0 22px; }
+  header p { font-size: 56px; }
+
+  .colonne { display: grid; grid-template-columns: 1.6fr 1fr; gap: 140px; padding-top: 90px; }
+  .colonna { display: flex; flex-direction: column; gap: 90px; }
+  h2 { font-family: var(--serif); font-weight: 400; color: var(--castagna); font-size: 96px; line-height: 1; margin-bottom: 26px; }
+  ul { list-style: none; }
+  li { display: flex; align-items: baseline; gap: 22px; font-size: 54px; line-height: 1.12; padding: 15px 0; }
+  li .nome { flex: 0 1 auto; }
+  li .punti { flex: 1; border-bottom: 5px dotted var(--beige); transform: translateY(-14px); min-width: 40px; }
+  li .prezzo { font-weight: 700; color: var(--salvia); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .unita { font-size: 46px; color: var(--verde-scuro); opacity: .7; margin-top: -24px; margin-bottom: 26px; }
+
+  /* Il latte non è pasta di Sofia: riquadro a parte, su fondo foglia */
+  .riquadro { margin-top: auto; margin-bottom: 120px; background: var(--foglia); border-radius: 50px; padding: 70px 100px 60px; }
+  .riquadro .testa { display: flex; align-items: baseline; justify-content: space-between; gap: 40px; margin-bottom: 30px; }
+  .riquadro h2 { color: var(--verde-scuro); margin: 18px 0 0; }
+  .riquadro .unita { margin: 0; }
+  .riquadro ul { display: grid; grid-template-columns: 1fr 1fr; column-gap: 140px; }
+  .riquadro li .punti { border-color: #c9d1c0; }
+
+  .piede { background: var(--salvia); color: var(--crema); padding: 60px 190px; display: flex; align-items: center; justify-content: space-between; gap: 60px; }
+  .piede img { height: 170px; }
+  .piede .dati { text-align: right; font-size: 50px; line-height: 1.5; letter-spacing: .03em; }
+  .piede b { font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="tela">
+  <div class="corpo">
+    <header>
+      <div class="occhiello" data-k="occhiello"></div>
+      <h1 data-k="titolo"></h1>
+      <p data-k="sottotitolo"></p>
+    </header>
+    <div class="colonne" id="colonne"></div>
+    <section class="riquadro" id="riquadro"></section>
+  </div>
+  <div class="piede">
+    <img src="../logo/logo-crema.png" alt="Caseificio Perrusio">
+    <div class="dati"><b>Negozio</b> · Via Angelo Cosenza 105, Meta (NA)<br>+39 081 878 7958 · caseificioperrusio.com</div>
+  </div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const voci = l => `<ul>${l.map(([n, p]) => `<li><span class="nome">${esc(n)}</span><span class="punti"></span><span class="prezzo">€ ${esc(p)}</span></li>`).join("")}</ul>`;
+  fetch(q.get("dati") || "listino-pasta-sofia.json").then(r => r.json()).then(d => {
+    for (const el of document.querySelectorAll("[data-k]")) el.textContent = d[el.dataset.k] || "";
+    document.getElementById("colonne").innerHTML = d.colonne.map(col =>
+      `<div class="colonna">${col.map(s => `<section><h2>${esc(s.nome)}</h2>${voci(s.voci)}</section>`).join("")}</div>`).join("");
+    const r = d.riquadro;
+    document.getElementById("riquadro").innerHTML = r ? `<div class="testa"><div><div class="occhiello">${esc(r.occhiello)}</div><h2>${esc(r.nome)}</h2></div><div class="unita">Prezzi ${esc(r.unita)}</div></div>${voci(r.voci)}` : "";
+    document.fonts.ready.then(() => document.body.dataset.pronto = "1");
+  });
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-// Uso: node caseificio/render.js grafiche/offerta.html grafiche/offerta-marmellata.json
+// Uso: node caseificio/render.js grafiche/offerta.html grafiche/offerta-marmellata.json [post,story,a4]
 // Crea in caseificio/esportate/<nome>/ i PNG per post e storia e la locandina A4 in PNG e PDF.
 const http = require("http");
 const fs = require("fs");
@@ -6,7 +6,7 @@ const path = require("path");
 const { chromium } = require("playwright");
 
 const radice = __dirname;
-const [modello, dati] = process.argv.slice(2);
+const [modello, dati, scelti] = process.argv.slice(2);
 if (!modello || !dati) { console.error("Uso: node render.js <modello.html> <dati.json>"); process.exit(1); }
 const nome = path.basename(dati, ".json");
 const uscita = path.join(radice, "esportate", nome);
@@ -24,7 +24,7 @@ const formati = [
   { f: "post", w: 1080, h: 1080 },
   { f: "story", w: 1080, h: 1920 },
   { f: "a4", w: 2480, h: 3508, pdf: true },
-];
+].filter(x => !scelti || scelti.split(",").includes(x.f));
 
 server.listen(0, async () => {
   const base = `http://localhost:${server.address().port}`;
