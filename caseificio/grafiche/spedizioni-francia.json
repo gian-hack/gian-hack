@@ -1,0 +1,23 @@
+{
+  "occhiello": "Listino prezzi spedizioni",
+  "titolo": "Costi di spedizione",
+  "sottotitolo": "Per tutto il territorio francese",
+  "sottotitolo_en": "Shipping costs within France",
+  "intestazione": ["Peso fino a", "Costo"],
+  "intestazione_en": ["Weight up to", "Cost"],
+  "righe": [
+    ["5 kg", "15,00"],
+    ["10 kg", "18,00"],
+    ["25 kg", "23,00"],
+    ["50 kg", "30,00"],
+    ["75 kg", "45,00"],
+    ["100 kg", "55,00"]
+  ],
+  "nota": "Tutti i prezzi sono da intendersi al netto di IVA",
+  "nota_en": "All prices are exclusive of VAT",
+  "avviso": "Importante",
+  "avviso_titolo": "Merce danneggiata",
+  "avviso_titolo_en": "Damaged goods",
+  "avviso_testo": "In caso di merce danneggiata, pacchi manomessi o non integri al momento della consegna, il cliente è tenuto a non accettare la spedizione e a segnalare immediatamente l’accaduto al corriere e al Caseificio Perrusio C. L’accettazione del pacco da parte del destinatario implica la piena conformità e integrità della merce, pertanto non sarà possibile richiedere rimborsi o sostituzioni successivamente.",
+  "avviso_testo_en": "In the event of damaged goods, or packages that have been tampered with or are damaged upon delivery, the customer is required not to accept the shipment and to immediately report the incident to the courier and to Caseificio Perrusio C. Acceptance of the package by the recipient implies full conformity and integrity of the goods; therefore, refunds or replacements cannot be requested subsequently."
+}

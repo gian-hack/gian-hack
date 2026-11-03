@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Spedizioni · Caseificio Perrusio</title>
+<style>
+  @font-face { font-family: "Karla"; src: url("../fonts/Karla.woff2") format("woff2"); font-weight: 200 800; }
+  @font-face { font-family: "Gelasio"; src: url("../fonts/Gelasio-Regular.woff2") format("woff2"); }
+  @font-face { font-family: "Gelasio"; src: url("../fonts/Gelasio-Italic.woff2") format("woff2"); font-style: italic; }
+
+  :root {
+    --salvia: #5C6E4F; --verde-scuro: #3F4A36; --castagna: #6A3F1A; --ocra: #DA8932;
+    --crema: #F8F0E3; --foglia: #E3E8DD; --beige: #EADFCF; --bordeaux: #6E2E28;
+    --serif: Georgia, "Gelasio", serif; --sans: "Karla", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--crema); }
+  body { font-family: var(--sans); color: var(--verde-scuro); -webkit-font-smoothing: antialiased; }
+
+  /* A4 a 300 dpi: 2480 × 3508 */
+  .tela { width: 2480px; height: 3508px; background: var(--crema); display: flex; flex-direction: column; }
+  .corpo { flex: 1; padding: 140px 220px 0; display: flex; flex-direction: column; }
+
+  .occhiello { font-weight: 700; text-transform: uppercase; letter-spacing: .22em; color: var(--ocra); font-size: 50px; }
+  .en { font-family: var(--serif); font-style: italic; color: var(--castagna); opacity: .75; }
+  header { text-align: center; padding-bottom: 60px; border-bottom: 5px solid var(--beige); }
+  header h1 { font-family: var(--serif); font-weight: 400; color: var(--castagna); font-size: 190px; line-height: 1.05; margin: 18px 0 20px; }
+  header p { font-size: 62px; }
+  header p.en { font-size: 54px; margin-top: 8px; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 70px; }
+  th { text-align: left; font-weight: 700; text-transform: uppercase; letter-spacing: .16em; font-size: 44px; color: var(--salvia); padding: 0 50px 30px; }
+  th:last-child, td:last-child { text-align: right; }
+  th .en { display: block; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 42px; margin-top: 6px; }
+  td { padding: 34px 50px; font-size: 80px; border-top: 4px solid var(--beige); }
+  tr:nth-child(even) td { background: rgba(234, 223, 207, .45); }
+  td:first-child { font-family: var(--serif); color: var(--castagna); }
+  td:last-child { font-weight: 700; color: var(--salvia); font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: 4px solid var(--beige); }
+  .nota { margin-top: 30px; text-align: right; font-size: 44px; padding: 0 50px; }
+  .nota .en { font-size: 40px; }
+
+  .avviso { margin-top: auto; margin-bottom: 110px; background: var(--foglia); border-radius: 50px; padding: 64px 100px 70px; }
+  .avviso .testa { display: flex; align-items: center; gap: 40px; margin-bottom: 40px; }
+  .pillola { background: var(--bordeaux); color: var(--crema); font-weight: 700; text-transform: uppercase; letter-spacing: .14em; font-size: 40px; padding: 14px 40px; border-radius: 999px; }
+  .avviso h2 { font-family: var(--serif); font-weight: 400; color: var(--verde-scuro); font-size: 90px; line-height: 1; }
+  .avviso h2 .en { font-size: 70px; }
+  .lingue { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; }
+  .lingue p { font-size: 44px; line-height: 1.5; }
+  .lingue .lingua { font-weight: 700; text-transform: uppercase; letter-spacing: .18em; font-size: 36px; color: var(--ocra); margin-bottom: 16px; }
+
+  .piede { background: var(--salvia); color: var(--crema); padding: 60px 220px; display: flex; align-items: center; justify-content: space-between; gap: 60px; }
+  .piede img { height: 170px; }
+  .piede .dati { text-align: right; font-size: 50px; line-height: 1.5; letter-spacing: .03em; }
+  .piede b { font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="tela">
+  <div class="corpo">
+    <header>
+      <div class="occhiello" data-k="occhiello"></div>
+      <h1 data-k="titolo"></h1>
+      <p data-k="sottotitolo"></p>
+      <p class="en" data-k="sottotitolo_en"></p>
+    </header>
+    <table>
+      <thead><tr id="intestazione"></tr></thead>
+      <tbody id="righe"></tbody>
+    </table>
+    <div class="nota">* <span data-k="nota"></span> · <span class="en" data-k="nota_en"></span></div>
+    <section class="avviso">
+      <div class="testa"><span class="pillola" data-k="avviso"></span><h2><span data-k="avviso_titolo"></span> · <span class="en" data-k="avviso_titolo_en"></span></h2></div>
+      <div class="lingue">
+        <div><div class="lingua">Italiano</div><p data-k="avviso_testo"></p></div>
+        <div><div class="lingua">English</div><p data-k="avviso_testo_en"></p></div>
+      </div>
+    </section>
+  </div>
+  <div class="piede">
+    <img src="../logo/logo-crema.png" alt="Caseificio Perrusio">
+    <div class="dati"><b>Caseificio Perrusio C. S.r.l.</b> · Meta (NA)<br>+39 081 878 7958 · caseificioperrusio.com</div>
+  </div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  fetch(q.get("dati") || "spedizioni-francia.json").then(r => r.json()).then(d => {
+    for (const el of document.querySelectorAll("[data-k]")) el.textContent = d[el.dataset.k] || "";
+    document.getElementById("intestazione").innerHTML = d.intestazione.map((h, i) => `<th>${esc(h)}<span class="en">${esc(d.intestazione_en[i])}</span></th>`).join("");
+    document.getElementById("righe").innerHTML = d.righe.map(([p, c]) => `<tr><td>${esc(p)}</td><td>€ ${esc(c)}</td></tr>`).join("");
+    document.fonts.ready.then(() => document.body.dataset.pronto = "1");
+  });
+</script>
+</body>
+</html>
